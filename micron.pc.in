@@ -1,0 +1,10 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: micron 
+Description: Micron Scanning Sonar and Pinger Library for Interface to Physical device 
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -lmicron
+Cflags: -I${includedir}
