@@ -5,6 +5,7 @@
 #include <QTimer>
 #include "SonarScan.h"
 
+
 static int MsgLength[] = {
 	3, //mtNULL = 3,
 	3, //mtVersionData=3,

@@ -7,8 +7,6 @@ qt4_automoc(
 
 QT4_WRAP_CPP(micron_MOC_SRCS 
 	SonarInterface.h
-	SonarScan.h
-	MicronConfiguration.h
 )
 
 

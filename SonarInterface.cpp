@@ -449,7 +449,7 @@ void SonarInterface::processMessage(uint8_t *message) {
 			depth+= ((message[15]-48))/100.0;
 			depth+= ((message[16]-48))/1000.0;
 		}else{
-			fprintf(stderr,"Cannot HAndle Unknown-AUX port data %c:%c",__FUNCTION__,__FILE__);
+			fprintf(stderr,"Cannot HAndle Unknown-AUX port data %s:%s",__FUNCTION__,__FILE__);
 		}
 		
 		//for(int i=10;i<packedSize+10;i++){
