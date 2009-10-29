@@ -1,10 +1,3 @@
-INCLUDE_DIRECTORIES(
-	${CMAKE_CURRENT_BINARY_DIR}
-	${QT_INCLUDE_DIR}
-	${QT_QT_INCLUDE_DIR}
-	${QT_QTCORE_INCLUDE_DIR}
-	${QT_LIBRARIES}
-)
 
 qt4_automoc(
 	SonarInterface.cpp
@@ -33,6 +26,7 @@ INSTALL(TARGETS micron
 INSTALL(FILES SonarScan.h MicronConfiguration.h DESTINATION include)
 
 CONFIGURE_FILE(micron.pc.in micron.pc @ONLY)
+
 INSTALL(FILES 
 	${CMAKE_BINARY_DIR}/micron.pc 
 	DESTINATION lib/pkgconfig
