@@ -90,7 +90,7 @@ class SonarInterface : public QThread
 	Q_OBJECT
 
 public:
-	SonarInterface(char* port);
+	SonarInterface(const char* port);
 	~SonarInterface();
 	void requestVersion();
 	void sendHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,

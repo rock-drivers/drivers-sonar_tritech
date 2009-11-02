@@ -69,7 +69,7 @@ SonarScan::SonarScan(
 }
 
 SonarScan::~SonarScan(){
-  //delete scanData;
+  delete scanData;
 }
 
 uint16_t SonarScan::getpackedSize(){

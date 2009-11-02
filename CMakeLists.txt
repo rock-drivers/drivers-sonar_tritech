@@ -21,7 +21,7 @@ INSTALL(TARGETS micron
 	LIBRARY DESTINATION lib
 )
 
-INSTALL(FILES SonarScan.h MicronConfiguration.h DESTINATION include)
+INSTALL(FILES SonarScan.h MicronConfiguration.h SonarInterface.h DESTINATION include)
 
 CONFIGURE_FILE(micron.pc.in micron.pc @ONLY)
 

@@ -5,7 +5,7 @@
 #include <fcntl.h>
 
 
-SonarInterface::SonarInterface(char* port) {
+SonarInterface::SonarInterface(const char* port) {
     readFD = open(port, (O_RDONLY | O_SYNC) );
     writeFD = open(port, (O_WRONLY | O_SYNC) );
     if (readFD == 0 || writeFD == 0) {
