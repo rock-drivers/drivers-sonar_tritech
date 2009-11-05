@@ -17,6 +17,8 @@ add_library(micron SHARED
 	${micron_MOC_SRCS}
 )
 
+target_link_libraries(micron ${QT_QTCORE_LIBRARIES})
+
 INSTALL(TARGETS micron 
 	LIBRARY DESTINATION lib
 )
