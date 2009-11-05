@@ -326,6 +326,7 @@ void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
         fprintf(stderr,"Cannot create unknown packet with id: %02X \n",type);
     }
 
+    
     int written = write(writeFD,msg,length+6);
     if (written != length+6) {
         fprintf(stderr,"Couldn't send Packet\n");
@@ -393,7 +394,7 @@ void SonarInterface::processMessage(uint8_t *message) {
     uint16_t dataBytes = message[37] | (message[38]<<8);
 
 	SonarScan *scan = new SonarScan(packedSize,deviceType,headStatus,sweepCode,headControl,range,txn,gain,slope,adSpawn,adLow,headingOffset,adInterval,leftLimit,rightLimit,steps,bearing,dataBytes,message+39);
-        emit scanComplete(scan);
+	emit scanComplete(scan);
 	
 	/*
 	for (int i=0;i<packedSize;i++) {
@@ -456,7 +457,7 @@ void SonarInterface::processMessage(uint8_t *message) {
 		//	fprintf(stdout,"%c ",message[i]);
 		//}
 		fprintf(stdout,"CalcDepth = %f\n",depth);
-    	emit newDepth(depth);    
+    		emit newDepth(depth);    
 		break;
 		}
     case mtAdcData:
