@@ -393,7 +393,15 @@ void SonarInterface::processMessage(uint8_t *message) {
 	uint16_t bearing = message[35] | (message[36]<<8);
     uint16_t dataBytes = message[37] | (message[38]<<8);
 
+	
+	//uint8_t debug[dataBytes];
+	
+	//for(int i=0;i<dataBytes;i++){
+	//	debug[i]=i;
+	//}
+	
 	SonarScan *scan = new SonarScan(packedSize,deviceType,headStatus,sweepCode,headControl,range,txn,gain,slope,adSpawn,adLow,headingOffset,adInterval,leftLimit,rightLimit,steps,bearing,dataBytes,message+39);
+
 	emit scanComplete(scan);
 	
 	/*
