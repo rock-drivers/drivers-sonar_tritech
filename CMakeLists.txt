@@ -1,3 +1,16 @@
+cmake_minimum_required(VERSION 2.6)
+
+find_package(Qt4 COMPONENTS QtCore REQUIRED)
+
+INCLUDE(${QT_USE_FILE})
+
+
+INCLUDE_DIRECTORIES(
+	${CMAKE_CURRENT_BINARY_DIR}
+	${QT_INCLUDE_DIR}
+	${QT_QT_INCLUDE_DIR}
+	${QT_QTCORE_INCLUDE_DIR}
+)
 
 qt4_automoc(
 	SonarInterface.cpp
