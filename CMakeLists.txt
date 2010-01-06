@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.6)
 
 #find_package(Qt4 COMPONENTS QtCore REQUIRED)
 #INCLUDE(${QT_USE_FILE})
+find_package( Boost COMPONENTS thread REQUIRED )
+include_directories(${Boost_INCLUDE_DIRS})
 
 #INCLUDE_DIRECTORIES(
 #	${CMAKE_CURRENT_BINARY_DIR}
@@ -28,6 +30,8 @@ add_library(micron SHARED
 	#${micron_MOC_SRCS}
 )
 
+
+target_link_libraries(micron ${Boost_LIBRARIES})
 #target_link_libraries(micron ${QT_QTCORE_LIBRARIES})
 
 INSTALL(TARGETS micron 
