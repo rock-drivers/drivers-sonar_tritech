@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <boost/thread.hpp>
 
 
 SonarInterface::SonarInterface(const char* port) {
@@ -15,20 +16,24 @@ SonarInterface::SonarInterface(const char* port) {
     //Device Adresses
     rxNode = 0x02;
     txNode = 0xFF;
-    readTimer.setSingleShot(false);
-    readTimer.start();
-    readTimer.setInterval(2000);
-    connect(&readTimer,SIGNAL(timeout()),this,SLOT(readTimeout()));
+    //readTimer.setSingleShot(false);
+    //readTimer.start();
+    //readTimer.setInterval(2000);
+    //connect(&readTimer,SIGNAL(timeout()),this,SLOT(readTimeout()));
     timeCnt=0;
     fileCnt=0;
     initialized=false;
     skippedBytes=0;
 }
 
+/*
 void SonarInterface::readTimeout() {
-    requestData();
-    fprintf(stderr,"Timeout for waiting data reached\n");
+    while(1){
+	requestData();
+    	fprintf(stderr,"Timeout for waiting data reached\n");
+    }
 }
+*/
 
 SonarInterface::~SonarInterface() {
 }
@@ -39,7 +44,7 @@ void SonarInterface::requestVersion()
 }
 
 void SonarInterface::requestData() {
-    readTimer.start(); //Restart
+    //readTimer.start(); //Restart
     sendPacked(mtSendData,0);
 }
 
@@ -402,7 +407,7 @@ void SonarInterface::processMessage(uint8_t *message) {
 	
 	SonarScan *scan = new SonarScan(packedSize,deviceType,headStatus,sweepCode,headControl,range,txn,gain,slope,adSpawn,adLow,headingOffset,adInterval,leftLimit,rightLimit,steps,bearing,dataBytes,message+39);
 
-	emit scanComplete(scan);
+	notifyPeers(scan);
 	
 	/*
 	for (int i=0;i<packedSize;i++) {
@@ -465,7 +470,7 @@ void SonarInterface::processMessage(uint8_t *message) {
 		//	fprintf(stdout,"%c ",message[i]);
 		//}
 		fprintf(stdout,"CalcDepth = %f\n",depth);
-    		emit newDepth(depth);    
+    		notifyPeers(depth);    
 		break;
 		}
     case mtAdcData:
@@ -518,6 +523,30 @@ void SonarInterface::processMessage(uint8_t *message) {
     }
 }
 
+
+void SonarInterface::registerHandler(SonarHandler *handler){
+	handlers.push_back(handler);
+}
+
+void SonarInterface::unregisterHandler(SonarHandler *handler){
+	handlers.remove(handler);
+}
+
+void SonarInterface::start(){
+        boost::thread thr1( boost::bind( &SonarInterface::run, this ) );
+}
+
+void SonarInterface::notifyPeers(float newDepth){
+	for(std::list<SonarHandler*>::iterator it =  handlers.begin(); it != handlers.end();it++){
+		(*it)->processDepth(newDepth);
+	}
+}
+
+void SonarInterface::notifyPeers(SonarScan *scan){
+	for(std::list<SonarHandler*>::iterator it = handlers.begin(); it != handlers.end();it++){
+		(*it)->processSonarScan(scan);
+	}
+}
 
 void SonarInterface::run() {
     uint8_t buffer[6000];

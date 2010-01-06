@@ -1,10 +1,18 @@
 #ifndef _SONARINTERFACE_H_
 #define _SONARINTERFACE_H_ 
 
-#include <QThread>
-#include <QTimer>
+//#include <QThread>
+//#include <QTimer>
 #include "SonarScan.h"
+#include <list>
 
+class SonarInterface;
+
+class SonarHandler{
+	public:
+	virtual void processDepth(const double depth)=0;
+	virtual void processSonarScan(SonarScan*)=0;
+};
 
 static int MsgLength[] = {
 	3, //mtNULL = 3,
@@ -85,9 +93,8 @@ enum HeadControl{
 	IGNORESENSOR = 32768
 };
 
-class SonarInterface : public QThread
+class SonarInterface
 {
-	Q_OBJECT
 
 public:
 	SonarInterface(const char* port);
@@ -99,21 +106,25 @@ public:
 		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint);
 	//void sendHeadData();
 	void requestData();
-	uint8_t scanData[6369*256];	
-
-
-public slots:
+	void registerHandler(SonarHandler*);
+	void unregisterHandler(SonarHandler*);
+	void start();
 	void readTimeout();
-
+/*
 signals:
 	void scanComplete(SonarScan*);
 	void newDepth(float);
+*/
 
 private:
+	void notifyPeers(float);
+	void notifyPeers(SonarScan*);
+	uint8_t scanData[6369*256];	
+	std::list<SonarHandler*> handlers;
 	void run();
 	void sendPacked(MsgType type,uint8_t *data);
 	void processMessage(uint8_t *message);
-	QTimer readTimer;
+//	QTimer readTimer;
 	int readFD;
 	int timeCnt;
 	int writeFD;

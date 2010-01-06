@@ -2,8 +2,8 @@
 #define _SONARSCAN_H_
 
 #include "inttypes.h"
-#include <QDataStream>
-
+#include <iostream>
+#include <ostream>
 
 class SonarScan {
 public:
@@ -73,13 +73,18 @@ private:
         uint16_t dataBytes;
 	uint8_t *scanData;
 
-  friend QDataStream& operator<<(QDataStream&, const SonarScan& scan);
-  friend QDataStream& operator>>(QDataStream&, SonarScan& scan);
+	friend std::istream& operator>>(std::istream& stream, SonarScan& scan);
+	friend std::ostream& operator<<(std::ostream &stream, const SonarScan& scan);
+
+	//friend QDataStream& operator<<(QDataStream&, const SonarScan& scan);
+	//friend QDataStream& operator>>(QDataStream&, SonarScan& scan);
 
 };
 
-  QDataStream& operator<<(QDataStream&, const SonarScan& scan);
-  QDataStream& operator>>(QDataStream&, SonarScan& scan);
-//QDataStream &operator>>(SonarScan &s);
+std::ostream& operator<<(std::ostream &stream, const SonarScan& scan);
+std::istream& operator>>(std::istream& stream, SonarScan& scan);
+
+ // QDataStream& operator<<(QDataStream&, const SonarScan& scan);
+ // QDataStream& operator>>(QDataStream&, SonarScan& scan);
 
 #endif

@@ -149,7 +149,8 @@ const uint8_t* SonarScan::getScanData(){
 }
 
 
-QDataStream& operator<<(QDataStream& stream,const SonarScan& scan){ 
+
+std::ostream& operator<<(std::ostream &stream, const SonarScan& scan){ 
   stream << scan.packedSize;
   stream << scan.deviceType;
   stream << scan.headStatus;
@@ -168,35 +169,14 @@ QDataStream& operator<<(QDataStream& stream,const SonarScan& scan){
   stream << scan.steps;
   stream << scan.bearing;
   stream << scan.dataBytes;
-  //fprintf(stdout,"Written %u data bytes!\n",scan.dataBytes);
-  stream.writeRawData((char*)scan.scanData,scan.dataBytes);
-  
-  
-  /*
-  stream.writeRawData(&scan.packedSize,2);
-  stream.writeRawData(&scan.deviceType,1);
-  stream.writeRawData(&scan.headStatus,1);
-  stream.writeRawData(&scan.sweepCode,1);
-  stream.writeRawData(&scan.headControl,2);
-  stream.writeRawData(&scan.range,2);
-  stream.writeRawData(&scan.txn,4);
-  stream.writeRawData(&scan.gain,1);
-  stream.writeRawData(&scan.slope,2);
-  stream.writeRawData(&scan.adSpawn,1);
-  stream.writeRawData(&scan.adLow,1);
-  stream.writeRawData(&scan.headingOffset,2);
-  stream.writeRawData(&scan.adInterval,2);
-  stream.writeRawData(&scan.leftLimit,2);
-  stream.writeRawData(&scan.rightLimit,2);
-  stream.writeRawData(&scan.steps,1);
-  stream.writeRawData(&scan.bearing,2);
-  stream.writeRawData(&scan.dataBytes,packedSize-31);
-*/
+  for(int i=0;i<scan.dataBytes;i++) 
+  	stream << scan.scanData[i];	
+  //stream.writeRawData((char*)scan.scanData,scan.dataBytes);
   return stream;
 }
 
 
-QDataStream& operator>>(QDataStream& stream, SonarScan& scan){
+std::istream& operator>>(std::istream& stream, SonarScan& scan){
   stream >> scan.packedSize;
   stream >> scan.deviceType;
   stream >> scan.headStatus;
@@ -215,49 +195,10 @@ QDataStream& operator>>(QDataStream& stream, SonarScan& scan){
   stream >> scan.steps;
   stream >> scan.bearing;
   stream >> scan.dataBytes;
-  //fprintf(stdout,"Readed %u data bytes!\n",scan.dataBytes);
   scan.scanData = new uint8_t[scan.dataBytes];
-  stream.readRawData((char*)scan.scanData,scan.dataBytes);
-    
-/*uint16_t packedSize;
-  uint8_t deviceType;
-  uint8_t headStatus;
-  uint8_t sweepCode;
-  uint16_t headControl;
-  uint16_t range;
-  uint32_t txn;
-  uint8_t gain;
-  uint16_t slope;
-  uint8_t adSpawn;
-  uint8_t adLow;
-  uint16_t headingOffset;
-  uint16_t adInterval;
-  uint16_t leftLimit;
-  uint16_t rightLimit;
-  uint8_t steps;
-  uint16_t bearing;
-  uint16_t *dataBytes
-*/
-/*
-  stream.readRawData(scan.packedSize,2);
-  stream.readRawData(scan.deviceType,1);
-  stream.readRawData(scan.headStatus,1);
-  stream.readRawData(scan.sweepCode,1);
-  stream.readRawData(scan.headControl,2);
-  stream.readRawData(scan.range,2);
-  stream.readRawData(scan.txn,4);
-  stream.readRawData(scan.gain,1);
-  stream.readRawData(scan.slope,2);
-  stream.readRawData(scan.adSpawn,1);
-  stream.readRawData(scan.adLow,1);
-  stream.readRawData(scan.headingOffset,2);
-  stream.readRawData(scan.adInterval,2);
-  stream.readRawData(scan.leftLimit,2);
-  stream.readRawData(scan.rightLimit,2);
-  stream.readRawData(scan.steps,1);
-  stream.readRawData(scan.bearing,2);
-  stream.readRawData(scan.dataBytes,packedSize-31);
-*/
+  for(int i=0;i<scan.dataBytes;i++) 
+  	stream >> scan.scanData[i];	
+//  stream.readRawData((char*)scan.scanData,scan.dataBytes);
   return stream;
 }
 
