@@ -379,7 +379,7 @@ void SonarInterface::processMessage(uint8_t *message) {
     }
     case mtHeadData:
     {
-    uint16_t packedSize = message[8] | (message[9]<<8);
+    	uint16_t packedSize = message[8] | (message[9]<<8);
 	uint8_t deviceType = message[10];
 	uint8_t headStatus = message[11];
 	uint8_t sweepCode = message[12];
@@ -396,7 +396,7 @@ void SonarInterface::processMessage(uint8_t *message) {
 	uint16_t rightLimit = message[32] | (message[33]<<8);
 	uint8_t steps = message[34];
 	uint16_t bearing = message[35] | (message[36]<<8);
-    uint16_t dataBytes = message[37] | (message[38]<<8);
+    	uint16_t dataBytes = message[37] | (message[38]<<8);
 
 	
 	//uint8_t debug[dataBytes];
@@ -439,7 +439,7 @@ void SonarInterface::processMessage(uint8_t *message) {
         fprintf(stderr,"Cannot handle SpectData-Packet\n");
         break;
     case mtAlive:
-        //requestData();
+        requestData();
         fprintf(stderr,"Got an Alive packet, Found Sonar!\n");
         break;
     case mtPrgAck:
