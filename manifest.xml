@@ -1,0 +1,4 @@
+<package>
+	<depend package="drivers/iodrivers_base" />
+</package>
+
