@@ -1,38 +1,33 @@
 cmake_minimum_required(VERSION 2.6)
 
-#find_package(Qt4 COMPONENTS QtCore REQUIRED)
-#INCLUDE(${QT_USE_FILE})
-find_package( Boost COMPONENTS thread REQUIRED )
-include_directories(${Boost_INCLUDE_DIRS})
+INCLUDE(FindPkgConfig)
 
-#INCLUDE_DIRECTORIES(
-#	${CMAKE_CURRENT_BINARY_DIR}
-#	${QT_INCLUDE_DIR}
-#	${QT_QT_INCLUDE_DIR}
-#	${QT_QTCORE_INCLUDE_DIR}
-#)
-
-#qt4_automoc(
-#	SonarInterface.cpp
-#	SonarScan.cpp
-#	MicronConfiguration.cpp
-#)
-
-#QT4_WRAP_CPP(micron_MOC_SRCS 
-#	SonarInterface.h
-#)
+pkg_check_modules(IO REQUIRED "iodrivers_base")
+INCLUDE_DIRECTORIES(${IO_INCLUDE_DIRS})
+LINK_DIRECTORIES(${IO_LIBRARY_DIRS})
 
 
 add_library(micron SHARED
 	SonarInterface.cpp
 	SonarScan.cpp
 	MicronConfiguration.cpp
-	#${micron_MOC_SRCS}
 )
 
+add_executable(micronTest
+	SonarInterface.cpp
+	SonarScan.cpp
+	MicronConfiguration.cpp
+	main.cpp
+)
 
-target_link_libraries(micron ${Boost_LIBRARIES})
-#target_link_libraries(micron ${QT_QTCORE_LIBRARIES})
+TARGET_LINK_LIBRARIES(micron
+	${IO_LIBRARIES}
+)
+
+TARGET_LINK_LIBRARIES(micronTest
+	${IO_LIBRARIES}
+)
+
 
 INSTALL(TARGETS micron 
 	LIBRARY DESTINATION lib

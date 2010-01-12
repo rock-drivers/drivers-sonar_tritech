@@ -1,39 +1,18 @@
 #include "SonarInterface.h"
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <boost/thread.hpp>
+#include <string.h>
 
+#define WRITETIMEOUT 200
 
-SonarInterface::SonarInterface(const char* port) {
-    readFD = open(port, (O_RDONLY | O_SYNC) );
-    writeFD = open(port, (O_WRONLY | O_SYNC) );
-    if (readFD == 0 || writeFD == 0) {
-        fprintf(stderr,"Cannot Open Device\n");
-        exit(-2);
-    }
+SonarInterface::SonarInterface(): 
+  IODriver(MAX_PACKET_SIZE,false)
+{
     //Device Adresses
     rxNode = 0x02;
     txNode = 0xFF;
-    //readTimer.setSingleShot(false);
-    //readTimer.start();
-    //readTimer.setInterval(2000);
-    //connect(&readTimer,SIGNAL(timeout()),this,SLOT(readTimeout()));
     timeCnt=0;
     fileCnt=0;
-    initialized=false;
-    skippedBytes=0;
 }
-
-/*
-void SonarInterface::readTimeout() {
-    while(1){
-	requestData();
-    	fprintf(stderr,"Timeout for waiting data reached\n");
-    }
-}
-*/
 
 SonarInterface::~SonarInterface() {
 }
@@ -44,7 +23,6 @@ void SonarInterface::requestVersion()
 }
 
 void SonarInterface::requestData() {
-    //readTimer.start(); //Restart
     sendPacked(mtSendData,0);
 }
 
@@ -332,8 +310,10 @@ void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
     }
 
     
-    int written = write(writeFD,msg,length+6);
-    if (written != length+6) {
+    bool written = writePacket(msg,length+6,WRITETIMEOUT);
+	
+
+    if (!written) {
         fprintf(stderr,"Couldn't send Packet\n");
     } else {
         /*
@@ -347,13 +327,18 @@ void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
 
 }
 
+void SonarInterface::processSerialData(){
+	uint8_t packed[MAX_PACKET_SIZE];
+	readPacket(packed,MAX_PACKET_SIZE,2000,2000);
+	processMessage(packed);
+}
 
 /**
  * Given message started on binary lengh field
  **/
 void SonarInterface::processMessage(uint8_t *message) {
 
-    uint8_t type = message[5];
+    uint8_t type = message[10];
 
     switch (type) {
 
@@ -362,42 +347,42 @@ void SonarInterface::processMessage(uint8_t *message) {
         break;
     case mtVersionData:
     {
-        softwareVersion = message[8];
-        infoBits = message[9];
-        serialNr = message[10] | (message[11] <<8);
-        programmLength = message[12] | (message[13] <<8) | (message[14] <<16) | (message[15] <<24);
-        programmChecksum = message[16] | (message[17] << 8);
-        nodeID = message[18];
+        softwareVersion = message[13];
+        infoBits = message[14];
+        serialNr = message[15] | (message[16] <<8);
+        programmLength = message[17] | (message[18] <<8) | (message[19] <<16) | (message[20] <<24);
+        programmChecksum = message[21] | (message[22] << 8);
+        nodeID = message[23];
         fprintf(stdout,"Software Version: 0x%02X\n",softwareVersion);
         fprintf(stdout,"InfoBits: 0x%02X\n",infoBits);
         fprintf(stdout,"Serial Number: %u\n",serialNr);
         fprintf(stdout,"Programm Length: %u\n",programmLength);
         fprintf(stdout,"Programm Checksum: %u\n",programmChecksum);
         fprintf(stdout,"Node ID: %u\n",nodeID);
-        initialized=true;
         break;
     }
     case mtHeadData:
     {
-    	uint16_t packedSize = message[8] | (message[9]<<8);
-	uint8_t deviceType = message[10];
-	uint8_t headStatus = message[11];
-	uint8_t sweepCode = message[12];
-	uint16_t headControl = message[13] | (message[14]<<8);
-	uint16_t range = message[15] | (message[16]<<8);
-	uint32_t txn = message[17] | (message[18]<<8) | (message[19]<<16) | (message[20]<<24);
-	uint8_t gain = message[21];
-	uint16_t slope = message[22] | (message[23]<<8);
-	uint8_t adSpawn = message[24];
-	uint8_t adLow = message[25];
-	uint16_t headingOffset = message[26] | (message[27]<<8);
-	uint16_t adInterval = message[28] | (message[29]<<8);
-	uint16_t leftLimit = message[30] | (message[31]<<8);
-	uint16_t rightLimit = message[32] | (message[33]<<8);
-	uint8_t steps = message[34];
-	uint16_t bearing = message[35] | (message[36]<<8);
-    	uint16_t dataBytes = message[37] | (message[38]<<8);
-
+    	
+    	uint16_t packedSize = message[13] | (message[14]<<8);
+	uint8_t deviceType = message[15];
+	uint8_t headStatus = message[16];
+	uint8_t sweepCode = message[17];
+	uint16_t headControl = message[18] | (message[19]<<8);
+	uint16_t range = message[20] | (message[21]<<8);
+	uint32_t txn = message[22] | (message[23]<<8) | (message[24]<<16) | (message[25]<<24);
+	uint8_t gain = message[26];
+	uint16_t slope = message[27] | (message[28]<<8);
+	uint8_t adSpawn = message[29];
+	uint8_t adLow = message[30];
+	uint16_t headingOffset = message[31] | (message[32]<<8);
+	uint16_t adInterval = message[33] | (message[34]<<8);
+	uint16_t leftLimit = message[35] | (message[36]<<8);
+	uint16_t rightLimit = message[37] | (message[38]<<8);
+	uint8_t steps = message[39];
+	uint16_t bearing = message[40] | (message[41]<<8);
+    	uint16_t dataBytes = message[42] | (message[43]<<8);
+	uint8_t *scanData = message+44;
 	
 	//uint8_t debug[dataBytes];
 	
@@ -405,32 +390,16 @@ void SonarInterface::processMessage(uint8_t *message) {
 	//	debug[i]=i;
 	//}
 	
-	SonarScan *scan = new SonarScan(packedSize,deviceType,headStatus,sweepCode,headControl,range,txn,gain,slope,adSpawn,adLow,headingOffset,adInterval,leftLimit,rightLimit,steps,bearing,dataBytes,message+39);
+	SonarScan *scan = new SonarScan(packedSize,deviceType,headStatus,sweepCode,headControl,range,txn,gain,slope,adSpawn,adLow,headingOffset,adInterval,leftLimit,rightLimit,steps,bearing,dataBytes,scanData);
 
 	notifyPeers(scan);
 	
-	/*
-	for (int i=0;i<packedSize;i++) {
-            printf("%02X ",message[i]);
-        }
-	*/
-	//TODO remove hack
-        //if (bearing==0) {
-            //sendHeadData();
-        //}
         uint8_t data[dataBytes];
-        memcpy(data,message+39,dataBytes);
+        memcpy(data,scanData,dataBytes);
         //fprintf(stdout,"Actual Bearing: %u.\n",bearing);
         //fprintf(stdout,"DataBytes recived: %u.\n",dataBytes);
-	/*
-        for (int i=0;i<dataBytes;i++) {
-            int writePos = ((bearing/16))+i*398;
-            //printf("ScanPosition %i: %u (%u,%u,%u)\n",writePos,data[i],bearing,dataBytes,i);
-            scanData[writePos] = data[i];
-        }
-	*/
-	//fprintf(stdout,"Requesting data\n");
-        requestData();
+      	 
+	requestData();
 
         //fprintf(stderr,"Cannot handle HeadData-Packet\n");
         break;
@@ -453,15 +422,15 @@ void SonarInterface::processMessage(uint8_t *message) {
         break;
     case mtAuxData:
 		{
-    	uint16_t packedSize = message[8] | (message[9]<<8);
+    	uint16_t packedSize = message[13] | (message[14]<<8);
 		float depth=0;
-		if(packedSize == 9 && message[13] == '.' && message[17] == 'm'){
-			depth+= ((message[10]-48)) * 100;
-			depth+= ((message[11]-48)) * 10;
-			depth+= ((message[12]-48));
-			depth+= ((message[14]-48))/10.0;
-			depth+= ((message[15]-48))/100.0;
-			depth+= ((message[16]-48))/1000.0;
+		if(packedSize == 9 && message[18] == '.' && message[22] == 'm'){
+			depth+= ((message[15]-48)) * 100;
+			depth+= ((message[16]-48)) * 10;
+			depth+= ((message[17]-48));
+			depth+= ((message[19]-48))/10.0;
+			depth+= ((message[20]-48))/100.0;
+			depth+= ((message[21]-48))/1000.0;
 		}else{
 			fprintf(stderr,"Cannot HAndle Unknown-AUX port data %s:%s",__FUNCTION__,__FILE__);
 		}
@@ -469,7 +438,6 @@ void SonarInterface::processMessage(uint8_t *message) {
 		//for(int i=10;i<packedSize+10;i++){
 		//	fprintf(stdout,"%c ",message[i]);
 		//}
-		fprintf(stdout,"CalcDepth = %f\n",depth);
     		notifyPeers(depth);    
 		break;
 		}
@@ -532,9 +500,6 @@ void SonarInterface::unregisterHandler(SonarHandler *handler){
 	handlers.remove(handler);
 }
 
-void SonarInterface::start(){
-        boost::thread thr1( boost::bind( &SonarInterface::run, this ) );
-}
 
 void SonarInterface::notifyPeers(float newDepth){
 	for(std::list<SonarHandler*>::iterator it =  handlers.begin(); it != handlers.end();it++){
@@ -548,67 +513,53 @@ void SonarInterface::notifyPeers(SonarScan *scan){
 	}
 }
 
-void SonarInterface::run() {
-    uint8_t buffer[6000];
-    //uint16_t pos=0;
+bool SonarInterface::init(std::string const &port){
+	return openSerial(port,115200);
+}
 
-    while (1) {
-        //Todo besser handlen das man die ganzen header auf
-        //einmal liest
-        int readed= read(readFD,buffer,1);
-        while (buffer[0] != '@') {
-			fprintf(stdout," \n");
-            read(readFD,buffer,1);
-	    	fprintf(stdout,"%02X ",buffer[0]);
-	    	skippedBytes++;
-			fprintf(stdout," Skipped %i bytes.\n",skippedBytes);
+int SonarInterface::getReadFD() {
+	return getFileDescriptor();
+}
+
+int SonarInterface::extractPacket(uint8_t const* buffer, size_t buffer_size) const{
+
+	if(buffer_size > 2000) { printf("HUCH: %i,",buffer_size); return -1;}
+
+	int readPos=0;
+	while (buffer[readPos] != '@' && readPos < buffer_size) {
+		readPos++;
         }
-        //Header lesen
-        readed = read(readFD,buffer,6);
-        uint16_t len = buffer[4] | (buffer[5] << 8);
-
-        uint8_t message[len];
-        //Read 2 bytes less because we have aleready read the length
-        //But we also tryiing to read the endline char into the msg
-	int readLen = len-1;
-	//int expectedLen=len-1;
 	
-
-        //readed=read(readFD,message+2,readLen) + 2;
-	readed=read(readFD,message+2,readLen);
-	int retrycount = 10;
-	while(readed != readLen && retrycount--){
-	  int newreaded = read(readFD,message+2+readed,readLen-readed);
-	  //fprintf(stdout,"Tryinig again.. trying to read %i bytes (%i != %i) \n",(readLen-readed),(readed),readLen);
-	  if(newreaded != -1){
-	    readed+=newreaded;
-	    usleep(10);
-	  }else{
-	    fprintf(stderr,"Cannot read the right bytes count so skipping\n");
-	    break;
-	  }
+	if(readPos == buffer_size){
+		fprintf(stdout,"Cannot detect Package start readPos: %i, bufferSize %i %02X\n",readPos, buffer_size, buffer[0]);
+		return 0;
 	}
-        if (readed != readLen) {
-            fprintf(stderr,"I'm not readed the right len %u|%u , oops\n",readed,len);
-            continue;
-        }
 
+	if(readPos>0){
+		//fprintf(stdout,"Skipping %i bytes.\n",readPos);
+            	//for (int i=0;i<readPos;i++)
+                //	fprintf(stderr,"%02X ",buffer[i]);
+		//fprintf(stderr,"\n");
+		return -readPos;
+	}
 
-        if (message[len] == 0x0A) {
-            message[0] = buffer[4];
-            message[1] = buffer[5];
-            processMessage(message);
+        uint16_t len = buffer[5] | (buffer[6] << 8) +5;
+	
+	if(len+1 > buffer_size){
+		//Packed Start correct, but not complete yet
+		return 0;
+	}
 
-            //char fname[200];
-            //sprintf(fname,"message-%i.raw",fileCnt++);
-            //int fd = open(fname,O_WRONLY | O_CREAT);
-            //write(fd,message,readed-1);
-            //close(fd);
-
+        if (buffer[len] == 0x0A || buffer[10] == 0x08) {
+	    //fprintf(stdout,"Message correct\n");
+            return len+1;
         } else {
-            fprintf(stderr,"Message doesn't ended with an newline was: %02X, skip message:\n",message[readed-1]);
-            for (int i=0;i<=len;i++)
-                fprintf(stderr,"%02X ",message[i]);
+            fprintf(stderr,"Message doesn't ended with an newline was(%u): %02X, skip message:\n",len,buffer[len]);
+            for (int i=0;i<buffer_size;i++)
+                fprintf(stderr,"%02X ",buffer[i]);
+	    fprintf(stderr,"\n");
+	    return -1;
         }
-    }
+	printf("Hops darf nie passieren\n");
+	//return -1;
 }

@@ -5,6 +5,7 @@
 //#include <QTimer>
 #include "SonarScan.h"
 #include <list>
+#include <iodrivers_base.hh>
 
 class SonarInterface;
 
@@ -93,46 +94,39 @@ enum HeadControl{
 	IGNORESENSOR = 32768
 };
 
-class SonarInterface
+class SonarInterface : public IODriver
 {
 
 public:
-	SonarInterface(const char* port);
+	SonarInterface();
 	~SonarInterface();
 	void requestVersion();
-	void sendHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,
-		bool pingpong,uint16_t rangeScale, uint16_t leftLimit, uint16_t rightLimit, uint8_t adSpan, 
-		uint8_t adLow, uint8_t initialGain, uint8_t motorStepDelayTime, uint8_t motorStepAngleSize,
-		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint);
-	//void sendHeadData();
+	void sendHeadData(bool adc8on=true,bool cont=true,bool scanright=false,bool invert=false,bool chan2=false,bool applyoffset=false,
+		bool pingpong=false,uint16_t rangeScale=30, uint16_t leftLimit=1, uint16_t rightLimit=6399, uint8_t adSpan=false, 
+		uint8_t adLow=8, uint8_t initialGain=84, uint8_t motorStepDelayTime=25, uint8_t motorStepAngleSize=16,
+		uint16_t adInterval=141, uint16_t numberOfBins=90, uint16_t adcSetpoint=0);
 	void requestData();
 	void registerHandler(SonarHandler*);
 	void unregisterHandler(SonarHandler*);
-	void start();
+	int getReadFD();
+	bool init(std::string const &port);
 	void readTimeout();
-/*
-signals:
-	void scanComplete(SonarScan*);
-	void newDepth(float);
-*/
+	void processSerialData();
 
 private:
+	
 	void notifyPeers(float);
 	void notifyPeers(SonarScan*);
 	uint8_t scanData[6369*256];	
 	std::list<SonarHandler*> handlers;
-	void run();
 	void sendPacked(MsgType type,uint8_t *data);
 	void processMessage(uint8_t *message);
-//	QTimer readTimer;
-	int readFD;
 	int timeCnt;
-	int writeFD;
 	uint8_t txNode;
 	uint8_t rxNode;
 	int fileCnt;
-	bool initialized;
-	int skippedBytes;
+	static const int MAX_PACKET_SIZE = 1024;
+	virtual int extractPacket(uint8_t const* buffer, size_t buffer_size) const;
 
 
 /* Sonar informations */
