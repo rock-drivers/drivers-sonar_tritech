@@ -12,6 +12,7 @@ SonarInterface::SonarInterface():
     txNode = 0xFF;
     timeCnt=0;
     fileCnt=0;
+    headDataChanged=false;
 }
 
 SonarInterface::~SonarInterface() {
@@ -23,6 +24,8 @@ void SonarInterface::requestVersion()
 }
 
 void SonarInterface::requestData() {
+    if(headDataChanged)
+   	sendPacked(mtHeadCommand,headData);
     sendPacked(mtSendData,0);
 }
 
@@ -30,8 +33,8 @@ void SonarInterface::sendHeadData(bool adc8on,bool cont,bool scanright,bool inve
 		bool pingpong,uint16_t rangeScale, uint16_t leftLimit, uint16_t rightLimit, uint8_t adSpan, 
 		uint8_t adLow, uint8_t initialGain, uint8_t motorStepDelayTime, uint8_t motorStepAngleSize,
 		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint) {
-    uint8_t data[68];
 
+    
     uint8_t V3BParams = 0x1D;
     //bool adc8on = true;
     //bool cont = true;
@@ -122,84 +125,86 @@ void SonarInterface::sendHeadData(bool adc8on,bool cont,bool scanright,bool inve
     //headControl = (headControl&255)<<8 | (headControl>>8)&255;
 
     int pos=0;
-    memcpy(data,&V3BParams,1);
+    memcpy(headData,&V3BParams,1);
     pos+=1;
-    memcpy((data+pos),&headControl,2);
+    memcpy((headData+pos),&headControl,2);
     pos+=2;
-    memcpy((data+pos),&headType,1);
+    memcpy((headData+pos),&headType,1);
     pos+=1;
-    memcpy((data+pos),&txnCh1,4);
+    memcpy((headData+pos),&txnCh1,4);
     pos+=4;
-    memcpy((data+pos),&txnCh2,4);
+    memcpy((headData+pos),&txnCh2,4);
     pos+=4;
-    memcpy((data+pos),&rxnCh1,4);
+    memcpy((headData+pos),&rxnCh1,4);
     pos+=4;
-    memcpy((data+pos),&rxnCh2,4);
+    memcpy((headData+pos),&rxnCh2,4);
     pos+=4;
-    memcpy((data+pos),&pulseLength,2);
+    memcpy((headData+pos),&pulseLength,2);
     pos+=2;
-    memcpy((data+pos),&rangeScale,2);
+    memcpy((headData+pos),&rangeScale,2);
     pos+=2;
-    memcpy((data+pos),&leftLimit,2);
+    memcpy((headData+pos),&leftLimit,2);
     pos+=2;
-    memcpy((data+pos),&rightLimit,2);
+    memcpy((headData+pos),&rightLimit,2);
     pos+=2;
-    memcpy((data+pos),&adSpan,1);
+    memcpy((headData+pos),&adSpan,1);
     pos++;
-    memcpy((data+pos),&adLow,1);
+    memcpy((headData+pos),&adLow,1);
     pos++;
-    memcpy((data+pos),&initialGainCh1,1);
+    memcpy((headData+pos),&initialGainCh1,1);
     pos++;
-    memcpy((data+pos),&initialGainCh2,1);
+    memcpy((headData+pos),&initialGainCh2,1);
     pos++;
-    memcpy((data+pos),&slopeCh1,2);
+    memcpy((headData+pos),&slopeCh1,2);
     pos+=2;
-    memcpy((data+pos),&slopeCh2,2);
+    memcpy((headData+pos),&slopeCh2,2);
     pos+=2;
-    memcpy((data+pos),&motorStepDelayTime,1);
+    memcpy((headData+pos),&motorStepDelayTime,1);
     pos++;
-    memcpy((data+pos),&motorStepAngleSize,1);
+    memcpy((headData+pos),&motorStepAngleSize,1);
     pos++;
-    memcpy((data+pos),&adInterval,2);
+    memcpy((headData+pos),&adInterval,2);
     pos+=2;
-    memcpy((data+pos),&numberOfBins,2);
+    memcpy((headData+pos),&numberOfBins,2);
     pos+=2;
-    memcpy((data+pos),&maxADBuff,2);
+    memcpy((headData+pos),&maxADBuff,2);
     pos+=2;
-    memcpy((data+pos),&lockoutTime,2);
+    memcpy((headData+pos),&lockoutTime,2);
     pos+=2;
-    memcpy((data+pos),&minorAxisDir,2);
+    memcpy((headData+pos),&minorAxisDir,2);
     pos+=2;
-    memcpy((data+pos),&majorAxisPan,1);
+    memcpy((headData+pos),&majorAxisPan,1);
     pos++;
-    memcpy((data+pos),&crtl2,1);
+    memcpy((headData+pos),&crtl2,1);
     pos++;
-    memcpy((data+pos),&scanZ,2);
+    memcpy((headData+pos),&scanZ,2);
     pos+=2;
-    memcpy((data+pos),&adSpanCh1,1);
+    memcpy((headData+pos),&adSpanCh1,1);
     pos++;
-    memcpy((data+pos),&adSpanCh2,1);
+    memcpy((headData+pos),&adSpanCh2,1);
     pos++;
-    memcpy((data+pos),&adLowCh1,1);
+    memcpy((headData+pos),&adLowCh1,1);
     pos++;
-    memcpy((data+pos),&adLowCh2,1);
+    memcpy((headData+pos),&adLowCh2,1);
     pos++;
-    memcpy((data+pos),&initialGainCh1_2,1);
+    memcpy((headData+pos),&initialGainCh1_2,1);
     pos++;
-    memcpy((data+pos),&initialGainCh2_2,1);
+    memcpy((headData+pos),&initialGainCh2_2,1);
     pos++;
-    memcpy((data+pos),&adcSetpointCh1,1);
+    memcpy((headData+pos),&adcSetpointCh1,1);
     pos++;
-    memcpy((data+pos),&adcSetpointCh2,1);
+    memcpy((headData+pos),&adcSetpointCh2,1);
     pos++;
-    memcpy((data+pos),&slopeCh1_2,2);
+    memcpy((headData+pos),&slopeCh1_2,2);
     pos+=2;
-    memcpy((data+pos),&slopeCh2_2,2);
+    memcpy((headData+pos),&slopeCh2_2,2);
     pos+=2;
-    memcpy((data+pos),&slopeDelayCh1,2);
+    memcpy((headData+pos),&slopeDelayCh1,2);
     pos+=2;
-    memcpy((data+pos),&slopeDelayCh2,2);
+    memcpy((headData+pos),&slopeDelayCh2,2);
     pos+=2;
+
+	//printf("Request change to %i bins\n",numberOfBins);
 /*
 fprintf(stdout,"\n%s,%s,%s,%s,%s,%s,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",mcr->getadc8on()?"true":"false",mcr->getcont()?"true":"false",
   mcr->getscanright()?"true":"false",mcr->getinvert()?"true":"false",mcr->getchan2()?"true":"false",mcr->getapplyoffset()?"true":"false",
@@ -213,7 +218,8 @@ fprintf(stdout,"\n%s,%s,%s,%s,%s,%s,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",mcr->
    }
    fprintf(stdout,"Head command data Finished.\n");
   */
-   sendPacked(mtHeadCommand,data);
+   headDataChanged=true;
+   sendPacked(mtHeadCommand,headData);
 }
 
 void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
@@ -329,7 +335,11 @@ void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
 
 void SonarInterface::processSerialData(){
 	uint8_t packed[MAX_PACKET_SIZE];
-	readPacket(packed,MAX_PACKET_SIZE,2000,2000);
+	try{
+		readPacket(packed,MAX_PACKET_SIZE,2000,2000);
+      	}catch(timeout_error t) {
+		printf("Timeout\n");
+	}
 	processMessage(packed);
 }
 
@@ -523,18 +533,21 @@ int SonarInterface::getReadFD() {
 
 int SonarInterface::extractPacket(uint8_t const* buffer, size_t buffer_size) const{
 
-	if(buffer_size > 2000) { printf("HUCH: %i,",buffer_size); return -1;}
-
+//	if(buffer_size > 2000) { printf("HUCH: %i,",buffer_size); return -1;}
+//	printf("size: %i \n",buffer_size);
+	
+	if(buffer_size<7) return 0;
+	
 	int readPos=0;
 	while (buffer[readPos] != '@' && readPos < buffer_size) {
 		readPos++;
         }
 	
-	if(readPos == buffer_size){
+/*	if(readPos > buffer_size){
 		fprintf(stdout,"Cannot detect Package start readPos: %i, bufferSize %i %02X\n",readPos, buffer_size, buffer[0]);
 		return 0;
 	}
-
+*/
 	if(readPos>0){
 		//fprintf(stdout,"Skipping %i bytes.\n",readPos);
             	//for (int i=0;i<readPos;i++)
@@ -542,22 +555,39 @@ int SonarInterface::extractPacket(uint8_t const* buffer, size_t buffer_size) con
 		//fprintf(stderr,"\n");
 		return -readPos;
 	}
+	//Double check length... with other lengh information
+        uint16_t len = (buffer[5] | (buffer[6]<<8 )) +5;
+	uint16_t hexlen = 0;
+	char hexsum[5];
+	memcpy(hexsum,buffer+1,4);
+	hexsum[4]=0;
 
-        uint16_t len = buffer[5] | (buffer[6] << 8) +5;
-	
+	sscanf(hexsum,"%x",(unsigned int*)&hexlen);
+//	printf("bla: %c,%c,%c,%c\n",buffer[1],buffer[2],buffer[3],buffer[4]);
+//	printf("Checks: %i,%i\n",len, hexlen);
+	if(len-5 != hexlen){
+		//printf("Kaput\n");
+		//Seems this is not the real packed start so we skip...
+		return -1;
+	}
 	if(len+1 > buffer_size){
+		//printf("Not complete yet (%i)\n",len+1);
 		//Packed Start correct, but not complete yet
 		return 0;
 	}
 
         if (buffer[len] == 0x0A || buffer[10] == 0x08) {
-	    //fprintf(stdout,"Message correct\n");
-            return len+1;
+	    if(buffer[10] == 0x08){
+	    	//fprintf(stdout,"Echosounder complete\n");
+	    	return len;
+	    }else{
+            	return len+1;
+	    }
         } else {
-            fprintf(stderr,"Message doesn't ended with an newline was(%u): %02X, skip message:\n",len,buffer[len]);
-            for (int i=0;i<buffer_size;i++)
-                fprintf(stderr,"%02X ",buffer[i]);
-	    fprintf(stderr,"\n");
+            //fprintf(stderr,"Message doesn't ended with an newline was(%u): %02X, skip message:\n",len,buffer[len]);
+            //for (int i=0;i<buffer_size;i++)
+            //    fprintf(stderr,"%02X ",buffer[i]);
+	    //fprintf(stderr,"\n");
 	    return -1;
         }
 	printf("Hops darf nie passieren\n");

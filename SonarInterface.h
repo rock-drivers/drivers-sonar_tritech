@@ -125,9 +125,11 @@ private:
 	uint8_t txNode;
 	uint8_t rxNode;
 	int fileCnt;
-	static const int MAX_PACKET_SIZE = 1024;
+	static const int MAX_PACKET_SIZE = 2048;
 	virtual int extractPacket(uint8_t const* buffer, size_t buffer_size) const;
 
+    uint8_t headData[68];
+    bool headDataChanged;
 
 /* Sonar informations */
       /* Informations from HeadCommand */
@@ -137,6 +139,7 @@ private:
       uint8_t nodeID;
       uint32_t programmLength;
       uint16_t programmChecksum;
+
 };
 
 #endif
