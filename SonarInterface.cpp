@@ -211,7 +211,7 @@ fprintf(stdout,"\n%s,%s,%s,%s,%s,%s,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",mcr->
   mcr->getpingpong()?"true":"false",mcr->getrangeScale(),mcr->getleftLimit(),mcr->getrightLimit(),mcr->getadSpan(),mcr->getadLow(),mcr->getinitialGain(),
   mcr->getmotorStepDelayTime(),mcr->getmotorStepAngleSize(),mcr->getadInterval(),mcr->getnumberOfBins(),mcr->getadcSetpointCh());
   */
-  /*
+ /* 
   fprintf(stdout,"Head command data:\n");
   for(int i=0;i<68;i++){
     	fprintf(stdout,"%02X ",data[i]);
@@ -219,7 +219,7 @@ fprintf(stdout,"\n%s,%s,%s,%s,%s,%s,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",mcr->
    fprintf(stdout,"Head command data Finished.\n");
   */
    headDataChanged=true;
-   sendPacked(mtHeadCommand,headData);
+   //sendPacked(mtHeadCommand,headData);
 }
 
 void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
@@ -241,7 +241,7 @@ void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
     switch (type) {
 
     case mtNull:
-        fprintf(stderr,"Cannot create null-Packet\n");
+        fprintf(stderr,"Cannot send null-Packet\n");
         break;
         /*
         case mtHeadData:
@@ -336,11 +336,11 @@ void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
 void SonarInterface::processSerialData(){
 	uint8_t packed[MAX_PACKET_SIZE];
 	try{
-		readPacket(packed,MAX_PACKET_SIZE,2000,2000);
+		readPacket(packed,MAX_PACKET_SIZE,200,200);
+		processMessage(packed);
       	}catch(timeout_error t) {
-		printf("Timeout\n");
+		printf("Timeout from readPacked\n");
 	}
-	processMessage(packed);
 }
 
 /**
@@ -418,6 +418,7 @@ void SonarInterface::processMessage(uint8_t *message) {
         fprintf(stderr,"Cannot handle SpectData-Packet\n");
         break;
     case mtAlive:
+    	sendHeadData();
         requestData();
         fprintf(stderr,"Got an Alive packet, Found Sonar!\n");
         break;
