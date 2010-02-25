@@ -125,7 +125,7 @@ private:
 	uint8_t txNode;
 	uint8_t rxNode;
 	int fileCnt;
-	static const int MAX_PACKET_SIZE = 2048;
+	static const int MAX_PACKET_SIZE = 9048;
 	virtual int extractPacket(uint8_t const* buffer, size_t buffer_size) const;
 
     uint8_t headData[68];
