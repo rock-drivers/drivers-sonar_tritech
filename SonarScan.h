@@ -8,6 +8,9 @@
 class SonarScan {
 public:
 SonarScan();
+
+SonarScan(SonarScan *other);
+
 SonarScan(
 	uint16_t packedSize,
 	uint8_t deviceType,

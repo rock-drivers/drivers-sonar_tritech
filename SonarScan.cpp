@@ -1,6 +1,31 @@
 #include "SonarScan.h"
 #include <string.h>
 
+SonarScan::SonarScan(SonarScan *other):
+	packedSize(other->packedSize),
+	deviceType(other->deviceType),
+	headStatus(other->headStatus),
+	sweepCode(other->sweepCode),
+	headControl(other->headControl),
+	range(other->range),
+	txn(other->txn),
+	gain(other->gain),
+	slope(other->slope),
+	adSpawn(other->adSpawn),
+	adLow(other->adLow),
+	headingOffset(other->headingOffset),
+	adInterval(other->adInterval),
+	leftLimit(other->leftLimit),
+	rightLimit(other->rightLimit),
+	steps(other->steps),
+	bearing(other->bearing),
+    	dataBytes(other->dataBytes)
+{
+  this->scanData = new uint8_t[dataBytes];
+  memcpy(this->scanData,other->scanData,dataBytes);
+	
+}
+
 SonarScan::SonarScan():
 	packedSize(0),
 	deviceType(0),
@@ -19,7 +44,7 @@ SonarScan::SonarScan():
 	rightLimit(0),
 	steps(0),
 	bearing(0),
-    dataBytes(0)
+    	dataBytes(0)
 {
 
 }
@@ -42,7 +67,7 @@ SonarScan::SonarScan(
 	uint16_t rightLimit,
 	uint8_t steps,
 	uint16_t bearing,
-    uint16_t dataBytes,
+    	uint16_t dataBytes,
 	uint8_t *scanData
 ):
 	packedSize(packedSize),
@@ -62,7 +87,7 @@ SonarScan::SonarScan(
 	rightLimit(rightLimit),
 	steps(steps),
 	bearing(bearing),
-    dataBytes(dataBytes)
+    	dataBytes(dataBytes)
 {
   this->scanData = new uint8_t[dataBytes];
   memcpy(this->scanData,scanData,dataBytes);
