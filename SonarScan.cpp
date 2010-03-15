@@ -174,6 +174,9 @@ const uint8_t* SonarScan::getScanData(){
 }
 
 
+double SonarScan::getScale(){
+  return  (((dataBytes*adInterval*640.0)/1000000000.0)*1500.0/2.0)/dataBytes;
+}
 
 std::ostream& operator<<(std::ostream &stream, const SonarScan& scan){ 
   stream << scan.packedSize;

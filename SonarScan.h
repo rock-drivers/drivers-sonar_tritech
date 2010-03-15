@@ -53,7 +53,7 @@ SonarScan(
   uint16_t getbearing();
   uint16_t getdataBytes();
   const uint8_t* getScanData();
-
+  double getScale();
 
 private:
 	uint16_t packedSize;
