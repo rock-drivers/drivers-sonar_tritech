@@ -169,7 +169,7 @@ uint16_t SonarScan::getdataBytes(){
   return dataBytes;
 }
 
-const uint8_t* SonarScan::getScanData(){
+uint8_t* SonarScan::getScanData(){
   return scanData;
 }
 

@@ -52,7 +52,7 @@ SonarScan(
   uint8_t getsteps();
   uint16_t getbearing();
   uint16_t getdataBytes();
-  const uint8_t* getScanData();
+  uint8_t* getScanData();
   double getScale();
 
 private:
