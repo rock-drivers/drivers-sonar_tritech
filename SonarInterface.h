@@ -6,6 +6,7 @@
 #include "SonarScan.h"
 #include <list>
 #include <iodrivers_base.hh>
+#include <sys/time.h>
 
 class SonarInterface;
 
@@ -130,6 +131,7 @@ private:
 
     uint8_t headData[68];
     bool headDataChanged;
+    timeval lastTime;
 
 /* Sonar informations */
       /* Informations from HeadCommand */
