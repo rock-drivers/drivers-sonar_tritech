@@ -165,6 +165,10 @@ uint16_t SonarScan::getbearing(){
   return bearing;
 }
 
+uint16_t SonarScan::getBearing(){
+  return bearing;
+}
+
 uint16_t SonarScan::getdataBytes(){
   return dataBytes;
 }

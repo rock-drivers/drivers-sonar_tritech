@@ -50,6 +50,7 @@ SonarScan(
   uint16_t getleftLimit();
   uint16_t getrightLimit();
   uint8_t getsteps();
+  uint16_t getBearing();
   uint16_t getbearing();
   uint16_t getdataBytes();
   uint8_t* getScanData();
