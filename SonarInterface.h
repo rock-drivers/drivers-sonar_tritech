@@ -113,7 +113,7 @@ public:
 	bool init(std::string const &port);
 	void readTimeout();
 	void processSerialData();
-
+	void reboot();
 private:
 	bool initialized;
 	bool runThread;

@@ -24,13 +24,14 @@ void SonarInterface::thread(){
 	}
 	while(runThread){
 		usleep(100000);
-		if(++waitCounter%4 == 0){
+		if(++waitCounter%2 == 0){
 			printf("Timeout reached, re request Data, please check this! %s,%s:%i\n",__FUNCTION__,__FILE__,__LINE__);
 			requestData();
 		}
-		if(waitCounter > 50){
+		if(waitCounter > 300){
 			printf("Critical couldn't get any data from sonar! %s:%i\n",__FILE__,__LINE__);
-			//TODO RESET SONAR
+			reboot();
+			waitCounter=0;
 		}
 	}
 }
@@ -38,6 +39,11 @@ void SonarInterface::thread(){
 SonarInterface::~SonarInterface() {
 	runThread=false;
 	usleep(500);
+}
+
+void SonarInterface::reboot()
+{
+    sendPacked(mtReBoot,0);
 }
 
 void SonarInterface::requestVersion()
@@ -290,11 +296,17 @@ void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
         	break;
         case mtTimeout:
         	break;
+	*/
         case mtReBoot:
+        	msg[10] = mtReBoot;
+	        msg[11] = 0x80;
+	        msg[12] = rxNode;
+	        msg[13] = 0x0A;
         	break;
+	/*
         case mtPerformanceData:
         	break;
-        	*/
+        */
     case mtHeadCommand:
         msg[10] = mtHeadCommand;
         msg[11] = 0x80;
