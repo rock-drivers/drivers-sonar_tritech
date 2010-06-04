@@ -437,7 +437,7 @@ void SonarInterface::processMessage(uint8_t *message) {
 	gettimeofday(&now,0);
 	int64_t usec = (now.tv_sec - lastTime.tv_sec)*1000 + (now.tv_usec - lastTime.tv_usec);
 
-	printf("Time between now %i,%i\n",now.tv_sec/1000,now.tv_usec%1000);
+	//printf("Time between now %i,%i\n",now.tv_sec/1000,now.tv_usec%1000);
 	lastTime=now;
         break;
     }
