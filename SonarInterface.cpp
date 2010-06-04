@@ -1,7 +1,7 @@
 #include "SonarInterface.h"
 #include <stdio.h>
 #include <string.h>
-#include <boost/interprocess/sync/interprocess_recursive_mutex.hpp>
+#include <boost/thread/thread.hpp>
 
 #define WRITETIMEOUT 200
 
@@ -15,13 +15,16 @@ SonarInterface::SonarInterface():
     fileCnt=0;
     headDataChanged=false;
     runThread=true;
-    boost::thread thr1( boost::bind( &SonarInterface::thread, this ) );
+    initialized=false;
 }
 
 void SonarInterface::thread(){
+	while(!initialized){
+		usleep(1000);
+	}
 	while(runThread){
-		usleep(100);
-		if(waitCounter++%3 == 0){
+		usleep(100000);
+		if(++waitCounter%4 == 0){
 			printf("Timeout reached, re request Data, please check this! %s,%s:%i\n",__FUNCTION__,__FILE__,__LINE__);
 			requestData();
 		}
@@ -429,7 +432,7 @@ void SonarInterface::processMessage(uint8_t *message) {
         //fprintf(stdout,"DataBytes recived: %u.\n",dataBytes);
       	 
 	requestData();
-	requestData();
+	//requestData();
 	//requestData();
 
         //fprintf(stderr,"Cannot handle HeadData-Packet\n");
@@ -555,7 +558,13 @@ void SonarInterface::notifyPeers(SonarScan *scan){
 }
 
 bool SonarInterface::init(std::string const &port){
-	return openSerial(port,115200);
+	bool init = openSerial(port,115200);
+	if(init){
+		initialized=true;
+    		boost::thread thr1( boost::bind( &SonarInterface::thread, this ) );
+		return true;
+	}
+	return false; 
 }
 
 int SonarInterface::getReadFD() {

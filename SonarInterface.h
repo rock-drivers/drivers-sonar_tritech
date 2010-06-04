@@ -115,6 +115,7 @@ public:
 	void processSerialData();
 
 private:
+	bool initialized;
 	bool runThread;
 	int waitCounter;
 	void thread();
