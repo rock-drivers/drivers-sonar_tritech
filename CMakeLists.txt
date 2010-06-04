@@ -6,6 +6,8 @@ pkg_check_modules(IO REQUIRED "iodrivers_base")
 INCLUDE_DIRECTORIES(${IO_INCLUDE_DIRS})
 LINK_DIRECTORIES(${IO_LIBRARY_DIRS})
 
+find_package(Boost COMPONENTS thread REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
 
 add_library(micron SHARED
 	SonarInterface.cpp
@@ -22,10 +24,12 @@ add_executable(micronTest
 
 TARGET_LINK_LIBRARIES(micron
 	${IO_LIBRARIES}
+	${Boost_LIBRARIES}
 )
 
 TARGET_LINK_LIBRARIES(micronTest
 	${IO_LIBRARIES}
+	${Boost_LIBRARIES}
 )
 
 

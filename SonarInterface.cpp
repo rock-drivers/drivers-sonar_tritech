@@ -1,6 +1,7 @@
 #include "SonarInterface.h"
 #include <stdio.h>
 #include <string.h>
+#include <boost/interprocess/sync/interprocess_recursive_mutex.hpp>
 
 #define WRITETIMEOUT 200
 
@@ -13,9 +14,27 @@ SonarInterface::SonarInterface():
     timeCnt=0;
     fileCnt=0;
     headDataChanged=false;
+    runThread=true;
+    boost::thread thr1( boost::bind( &SonarInterface::thread, this ) );
+}
+
+void SonarInterface::thread(){
+	while(runThread){
+		usleep(100);
+		if(waitCounter++%3 == 0){
+			printf("Timeout reached, re request Data, please check this! %s,%s:%i\n",__FUNCTION__,__FILE__,__LINE__);
+			requestData();
+		}
+		if(waitCounter > 50){
+			printf("Critical couldn't get any data from sonar! %s:%i\n",__FILE__,__LINE__);
+			//TODO RESET SONAR
+		}
+	}
 }
 
 SonarInterface::~SonarInterface() {
+	runThread=false;
+	usleep(500);
 }
 
 void SonarInterface::requestVersion()
@@ -373,7 +392,7 @@ void SonarInterface::processMessage(uint8_t *message) {
     }
     case mtHeadData:
     {
-    	
+   	waitCounter=0;	
     	uint16_t packedSize = message[13] | (message[14]<<8);
 	uint8_t deviceType = message[15];
 	uint8_t headStatus = message[16];
@@ -410,6 +429,8 @@ void SonarInterface::processMessage(uint8_t *message) {
         //fprintf(stdout,"DataBytes recived: %u.\n",dataBytes);
       	 
 	requestData();
+	requestData();
+	//requestData();
 
         //fprintf(stderr,"Cannot handle HeadData-Packet\n");
 	timeval now;
@@ -450,6 +471,9 @@ void SonarInterface::processMessage(uint8_t *message) {
 			depth+= ((message[21]-48))/1000.0;
 		}else{
 			fprintf(stderr,"Cannot HAndle Unknown-AUX port data %s:%s",__FUNCTION__,__FILE__);
+			for(int i=10;i<packedSize;i++){
+				fprintf(stdout,"%c ",message[i]);
+			}
 		}
 		
 		//for(int i=10;i<packedSize+10;i++){

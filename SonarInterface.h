@@ -115,7 +115,9 @@ public:
 	void processSerialData();
 
 private:
-	
+	bool runThread;
+	int waitCounter;
+	void thread();
 	void notifyPeers(float);
 	void notifyPeers(SonarScan*);
 	uint8_t scanData[6369*256];	
