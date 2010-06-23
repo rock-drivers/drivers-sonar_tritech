@@ -14,31 +14,10 @@ SonarInterface::SonarInterface():
     timeCnt=0;
     fileCnt=0;
     headDataChanged=false;
-    runThread=true;
     initialized=false;
 }
 
-void SonarInterface::thread(){
-	while(!initialized){
-		usleep(1000);
-	}
-	while(runThread){
-		usleep(100000);
-		if(++waitCounter%2 == 0){
-			printf("Timeout reached, re request Data, please check this! %s,%s:%i\n",__FUNCTION__,__FILE__,__LINE__);
-			requestData();
-		}
-		if(waitCounter > 300){
-			printf("Critical couldn't get any data from sonar! %s:%i\n",__FILE__,__LINE__);
-			reboot();
-			waitCounter=0;
-		}
-	}
-}
-
 SonarInterface::~SonarInterface() {
-	runThread=false;
-	usleep(500);
 }
 
 void SonarInterface::reboot()
@@ -367,14 +346,16 @@ void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
 
 }
 
-void SonarInterface::processSerialData(){
+bool SonarInterface::processSerialData(int timeout){
 	uint8_t packed[MAX_PACKET_SIZE];
 	try{
-		readPacket(packed,MAX_PACKET_SIZE,200,200);
+		readPacket(packed,MAX_PACKET_SIZE,timeout,timeout);
 		processMessage(packed);
+                return true;
       	}catch(timeout_error t) {
 		printf("Timeout from readPacked\n");
 	}
+        return false;
 }
 
 /**
@@ -382,6 +363,7 @@ void SonarInterface::processSerialData(){
  **/
 void SonarInterface::processMessage(uint8_t *message) {
 
+    base::Time timestamp = base::Time::now();
     uint8_t type = message[10];
 
     switch (type) {
@@ -407,26 +389,25 @@ void SonarInterface::processMessage(uint8_t *message) {
     }
     case mtHeadData:
     {
-   	waitCounter=0;	
-    	uint16_t packedSize = message[13] | (message[14]<<8);
-	uint8_t deviceType = message[15];
-	uint8_t headStatus = message[16];
-	uint8_t sweepCode = message[17];
-	uint16_t headControl = message[18] | (message[19]<<8);
-	uint16_t range = message[20] | (message[21]<<8);
-	uint32_t txn = message[22] | (message[23]<<8) | (message[24]<<16) | (message[25]<<24);
-	uint8_t gain = message[26];
-	uint16_t slope = message[27] | (message[28]<<8);
-	uint8_t adSpawn = message[29];
-	uint8_t adLow = message[30];
-	uint16_t headingOffset = message[31] | (message[32]<<8);
-	uint16_t adInterval = message[33] | (message[34]<<8);
-	uint16_t leftLimit = message[35] | (message[36]<<8);
-	uint16_t rightLimit = message[37] | (message[38]<<8);
-	uint8_t steps = message[39];
-	uint16_t bearing = message[40] | (message[41]<<8);
-    	uint16_t dataBytes = message[42] | (message[43]<<8);
-	uint8_t *scanData = message+44;
+    	uint16_t packedSize    = message[13] | (message[14]<<8);
+    	uint8_t deviceType     = message[15];
+    	uint8_t headStatus     = message[16];
+    	uint8_t sweepCode      = message[17];
+    	uint16_t headControl   = message[18] | (message[19]<<8);
+    	uint16_t range         = message[20] | (message[21]<<8);
+    	uint32_t txn           = message[22] | (message[23]<<8) | (message[24]<<16) | (message[25]<<24);
+    	uint8_t gain           = message[26];
+    	uint16_t slope         = message[27] | (message[28]<<8);
+    	uint8_t adSpawn        = message[29];
+    	uint8_t adLow          = message[30];
+    	uint16_t headingOffset = message[31] | (message[32]<<8);
+    	uint16_t adInterval    = message[33] | (message[34]<<8);
+    	uint16_t leftLimit     = message[35] | (message[36]<<8);
+    	uint16_t rightLimit    = message[37] | (message[38]<<8);
+    	uint8_t steps          = message[39];
+    	uint16_t bearing       = message[40] | (message[41]<<8);
+    	uint16_t dataBytes     = message[42] | (message[43]<<8);
+    	uint8_t *scanData      = message+44;
 	
 	//uint8_t debug[dataBytes];
 	
@@ -434,34 +415,26 @@ void SonarInterface::processMessage(uint8_t *message) {
 	//	debug[i]=i;
 	//}
 	
-	SonarScan *scan = new SonarScan(packedSize,deviceType,headStatus,sweepCode,headControl,range,txn,gain,slope,adSpawn,adLow,headingOffset,adInterval,leftLimit,rightLimit,steps,bearing,dataBytes,scanData);
-
+	SonarScan scan(packedSize,deviceType,headStatus,sweepCode,headControl,
+                range,txn,gain,slope,adSpawn,adLow,headingOffset,adInterval,
+                leftLimit,rightLimit,steps,bearing,dataBytes,scanData);
+        scan.time = timestamp;
 	notifyPeers(scan);
 	
-        uint8_t data[dataBytes];
-        memcpy(data,scanData,dataBytes);
+        //uint8_t data[dataBytes];
+        //memcpy(data,scanData,dataBytes);
         //fprintf(stdout,"Actual Bearing: %u.\n",bearing);
         //fprintf(stdout,"DataBytes recived: %u.\n",dataBytes);
       	 
-	requestData();
-	//requestData();
-	//requestData();
-
         //fprintf(stderr,"Cannot handle HeadData-Packet\n");
-	timeval now;
-	gettimeofday(&now,0);
-	int64_t usec = (now.tv_sec - lastTime.tv_sec)*1000 + (now.tv_usec - lastTime.tv_usec);
-
 	//printf("Time between now %i,%i\n",now.tv_sec/1000,now.tv_usec%1000);
-	lastTime=now;
         break;
     }
     case mtSpectData:
         fprintf(stderr,"Cannot handle SpectData-Packet\n");
         break;
     case mtAlive:
-    	sendHeadData();
-        requestData();
+        lastKeepAlive = timestamp;
         fprintf(stderr,"Got an Alive packet, Found Sonar!\n");
         break;
     case mtPrgAck:
@@ -494,7 +467,7 @@ void SonarInterface::processMessage(uint8_t *message) {
 		//for(int i=10;i<packedSize+10;i++){
 		//	fprintf(stdout,"%c ",message[i]);
 		//}
-    		notifyPeers(depth);    
+    		notifyPeers(timestamp, depth);    
 		break;
 		}
     case mtAdcData:
@@ -557,30 +530,20 @@ void SonarInterface::unregisterHandler(SonarHandler *handler){
 }
 
 
-void SonarInterface::notifyPeers(float newDepth){
+void SonarInterface::notifyPeers(base::Time const& time, float newDepth){
 	for(std::list<SonarHandler*>::iterator it =  handlers.begin(); it != handlers.end();it++){
-		(*it)->processDepth(newDepth);
+		(*it)->processDepth(time, newDepth);
 	}
 }
 
-void SonarInterface::notifyPeers(SonarScan *scan){
+void SonarInterface::notifyPeers(SonarScan const& scan){
 	for(std::list<SonarHandler*>::iterator it = handlers.begin(); it != handlers.end();it++){
 		(*it)->processSonarScan(scan);
 	}
 }
 
 bool SonarInterface::init(std::string const &port){
-	bool init = openSerial(port,115200);
-	if(init){
-		initialized=true;
-    		boost::thread thr1( boost::bind( &SonarInterface::thread, this ) );
-		return true;
-	}
-	return false; 
-}
-
-int SonarInterface::getReadFD() {
-	return getFileDescriptor();
+	return openSerial(port,115200);
 }
 
 int SonarInterface::extractPacket(uint8_t const* buffer, size_t buffer_size) const{

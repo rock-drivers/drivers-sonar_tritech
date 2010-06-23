@@ -7,11 +7,11 @@ class Interface: public SonarHandler{
 	Interface(){
 	}
 
-	void processDepth(const double depth){
+	void processDepth(base::Time const& time, double depth){
 		printf("Got Ground distance: %f\n",depth);
 	}
 
-	void processSonarScan(SonarScan*){
+	void processSonarScan(SonarScan const&){
 		printf("Got Scan\n");
 	};
 };
@@ -33,9 +33,11 @@ int main(int argc, char* argv[]) {
   */
   si.registerHandler(&i);
   si.sendHeadData(); 
+    si.requestData();
     while(1){
       try {
 	si.processSerialData();
+        si.requestData();
       }catch(timeout_error t) {
 	printf("Timeout\n");
       }

@@ -1,19 +1,17 @@
 #ifndef _SONARINTERFACE_H_
 #define _SONARINTERFACE_H_ 
 
-//#include <QThread>
-//#include <QTimer>
 #include "SonarScan.h"
 #include <list>
 #include <iodrivers_base.hh>
-#include <sys/time.h>
+#include <base/time.h>
 
 class SonarInterface;
 
 class SonarHandler{
 	public:
-	virtual void processDepth(const double depth)=0;
-	virtual void processSonarScan(SonarScan*)=0;
+	virtual void processDepth(base::Time const& time, double depth)=0;
+	virtual void processSonarScan(SonarScan const&)=0;
 };
 
 static int MsgLength[] = {
@@ -109,18 +107,17 @@ public:
 	void requestData();
 	void registerHandler(SonarHandler*);
 	void unregisterHandler(SonarHandler*);
-	int getReadFD();
 	bool init(std::string const &port);
-	void readTimeout();
-	void processSerialData();
+	bool processSerialData(int timeout = 400);
 	void reboot();
+
+        base::Time lastKeepAlive;
+
 private:
 	bool initialized;
-	bool runThread;
 	int waitCounter;
-	void thread();
-	void notifyPeers(float);
-	void notifyPeers(SonarScan*);
+	void notifyPeers(base::Time const& time, float depth);
+	void notifyPeers(SonarScan const& scan);
 	uint8_t scanData[6369*256];	
 	std::list<SonarHandler*> handlers;
 	void sendPacked(MsgType type,uint8_t *data);
@@ -134,7 +131,6 @@ private:
 
     uint8_t headData[68];
     bool headDataChanged;
-    timeval lastTime;
 
 /* Sonar informations */
       /* Informations from HeadCommand */

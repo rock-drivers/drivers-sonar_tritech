@@ -1,29 +1,26 @@
 #include "SonarScan.h"
 #include <string.h>
 
-SonarScan::SonarScan(SonarScan *other):
-	packedSize(other->packedSize),
-	deviceType(other->deviceType),
-	headStatus(other->headStatus),
-	sweepCode(other->sweepCode),
-	headControl(other->headControl),
-	range(other->range),
-	txn(other->txn),
-	gain(other->gain),
-	slope(other->slope),
-	adSpawn(other->adSpawn),
-	adLow(other->adLow),
-	headingOffset(other->headingOffset),
-	adInterval(other->adInterval),
-	leftLimit(other->leftLimit),
-	rightLimit(other->rightLimit),
-	steps(other->steps),
-	bearing(other->bearing),
-    	dataBytes(other->dataBytes)
+SonarScan::SonarScan(SonarScan const& other):
+	packedSize(other.packedSize),
+	deviceType(other.deviceType),
+	headStatus(other.headStatus),
+	sweepCode(other.sweepCode),
+	headControl(other.headControl),
+	range(other.range),
+	txn(other.txn),
+	gain(other.gain),
+	slope(other.slope),
+	adSpawn(other.adSpawn),
+	adLow(other.adLow),
+	headingOffset(other.headingOffset),
+	adInterval(other.adInterval),
+	leftLimit(other.leftLimit),
+	rightLimit(other.rightLimit),
+	steps(other.steps),
+	bearing(other.bearing)
 {
-  this->scanData = new uint8_t[dataBytes];
-  memcpy(this->scanData,other->scanData,dataBytes);
-	
+    scanData = other.scanData;
 }
 
 SonarScan::SonarScan():
@@ -43,8 +40,7 @@ SonarScan::SonarScan():
 	leftLimit(0),
 	rightLimit(0),
 	steps(0),
-	bearing(0),
-    	dataBytes(0)
+	bearing(0)
 {
 
 }
@@ -86,100 +82,15 @@ SonarScan::SonarScan(
 	leftLimit(leftLimit),
 	rightLimit(rightLimit),
 	steps(steps),
-	bearing(bearing),
-    	dataBytes(dataBytes)
+	bearing(bearing)
 {
-  this->scanData = new uint8_t[dataBytes];
-  memcpy(this->scanData,scanData,dataBytes);
+    this->scanData.resize(dataBytes);
+    memcpy(&this->scanData[0], scanData, dataBytes);
 }
 
-SonarScan::~SonarScan(){
-  delete scanData;
-}
-
-uint16_t SonarScan::getpackedSize(){
-  return packedSize;
-}
-
-uint8_t SonarScan::getdeviceType(){
-  return deviceType;
-}
-
-uint8_t SonarScan::getheadStatus(){
-  return headStatus;
-}
-
-uint8_t SonarScan::getsweepCode(){
-  return sweepCode;
-}
-
-uint16_t SonarScan::getheadControl(){
-  return headControl;
-}
-
-uint16_t SonarScan::getrange(){
-  return range;
-}
-
-uint32_t SonarScan::gettxn(){
-  return txn;
-}
-
-uint8_t SonarScan::getgain(){
-  return gain;
-}
-
-uint16_t SonarScan::getslope(){
-  return slope;
-}
-
-uint8_t SonarScan::getadSpawn(){
-  return adSpawn;
-}
-
-uint8_t SonarScan::getadLow(){
-  return adLow;
-}
-
-uint16_t SonarScan::getheadingOffset(){
-  return headingOffset;
-}
-
-uint16_t SonarScan::getadInterval(){
-  return adInterval;
-}
-
-uint16_t SonarScan::getleftLimit(){
-  return leftLimit;
-}
-
-uint16_t SonarScan::getrightLimit(){
-  return rightLimit;
-}
-
-uint8_t SonarScan::getsteps(){
-  return steps;
-}
-
-uint16_t SonarScan::getbearing(){
-  return bearing;
-}
-
-uint16_t SonarScan::getBearing(){
-  return bearing;
-}
-
-uint16_t SonarScan::getdataBytes(){
-  return dataBytes;
-}
-
-uint8_t* SonarScan::getScanData(){
-  return scanData;
-}
-
-
-double SonarScan::getScale(){
-  return  (((dataBytes*adInterval*640.0)/1000000000.0)*1500.0/2.0)/dataBytes;
+double SonarScan::getScale() const
+{
+  return  (((scanData.size()*adInterval*640.0)/1000000000.0)*1500.0/2.0)/scanData.size();
 }
 
 std::ostream& operator<<(std::ostream &stream, const SonarScan& scan){ 
@@ -200,37 +111,37 @@ std::ostream& operator<<(std::ostream &stream, const SonarScan& scan){
   stream << scan.rightLimit;
   stream << scan.steps;
   stream << scan.bearing;
-  stream << scan.dataBytes;
-  for(int i=0;i<scan.dataBytes;i++) 
+  stream << scan.scanData.size();
+  for(int i=0;i<scan.scanData.size();i++) 
   	stream << scan.scanData[i];	
-  //stream.writeRawData((char*)scan.scanData,scan.dataBytes);
   return stream;
 }
 
 
 std::istream& operator>>(std::istream& stream, SonarScan& scan){
-  stream >> scan.packedSize;
-  stream >> scan.deviceType;
-  stream >> scan.headStatus;
-  stream >> scan.sweepCode;
-  stream >> scan.headControl;
-  stream >> scan.range;
-  stream >> scan.txn;
-  stream >> scan.gain;
-  stream >> scan.slope;
-  stream >> scan.adSpawn;
-  stream >> scan.adLow;
-  stream >> scan.headingOffset;
-  stream >> scan.adInterval;
-  stream >> scan.leftLimit;
-  stream >> scan.rightLimit;
-  stream >> scan.steps;
-  stream >> scan.bearing;
-  stream >> scan.dataBytes;
-  scan.scanData = new uint8_t[scan.dataBytes];
-  for(int i=0;i<scan.dataBytes;i++) 
-  	stream >> scan.scanData[i];	
-//  stream.readRawData((char*)scan.scanData,scan.dataBytes);
+  //stream >> scan.packedSize;
+  //stream >> scan.deviceType;
+  //stream >> scan.headStatus;
+  //stream >> scan.sweepCode;
+  //stream >> scan.headControl;
+  //stream >> scan.range;
+  //stream >> scan.txn;
+  //stream >> scan.gain;
+  //stream >> scan.slope;
+  //stream >> scan.adSpawn;
+  //stream >> scan.adLow;
+  //stream >> scan.headingOffset;
+  //stream >> scan.adInterval;
+  //stream >> scan.leftLimit;
+  //stream >> scan.rightLimit;
+  //stream >> scan.steps;
+  //stream >> scan.bearing;
+
+  //size_t scan_size;
+  //stream >> scan_size;
+  //scan.scanData.resize(scan_size);
+  //for(int i=0;i<scan_size;i++) 
+  //	stream >> scan.scanData[i];	
   return stream;
 }
 
