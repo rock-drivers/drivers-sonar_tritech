@@ -102,8 +102,8 @@ public:
 	void requestVersion();
 	void sendHeadData(bool adc8on=true,bool cont=true,bool scanright=false,bool invert=false,bool chan2=false,bool applyoffset=false,
 	bool pingpong=false,uint16_t rangeScale=30, uint16_t leftLimit=1, uint16_t rightLimit=6399, uint8_t adSpan=false, 
-	uint8_t adLow=8, uint8_t initialGain=84, uint8_t motorStepDelayTime=25, uint8_t motorStepAngleSize=32,
-	uint16_t adInterval=200, uint16_t numberOfBins=600, uint16_t adcSetpoint=0);
+	uint8_t adLow=8, uint8_t initialGain=84, uint8_t motorStepDelayTime=25, uint8_t motorStepAngleSize=16,
+	uint16_t adInterval=20, uint16_t numberOfBins=600, uint16_t adcSetpoint=0);
 	void requestData();
 	void registerHandler(SonarHandler*);
 	void unregisterHandler(SonarHandler*);
