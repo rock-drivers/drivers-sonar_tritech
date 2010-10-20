@@ -41,7 +41,8 @@ void SonarInterface::sendHeadData(bool adc8on,bool cont,bool scanright,bool inve
 		uint8_t adLow, uint8_t initialGain, uint8_t motorStepDelayTime, uint8_t motorStepAngleSize,
 		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint) {
 
-    
+   
+    currentMotorStepAngleSize = motorStepAngleSize;
     uint8_t V3BParams = 0x1D;
     //bool adc8on = true;
     //bool cont = true;
@@ -427,7 +428,10 @@ void SonarInterface::processMessage(uint8_t *message) {
         //fprintf(stdout,"DataBytes recived: %u.\n",dataBytes);
       	 
         //fprintf(stderr,"Cannot handle HeadData-Packet\n");
-	//printf("Time between now %i,%i\n",now.tv_sec/1000,now.tv_usec%1000);
+	
+	base::Time delta = timestamp-lastPackage;
+	printf("Time between now %f fullscan: %f\n",delta.toSeconds(),delta.toSeconds()*6400.0/(double)currentMotorStepAngleSize);
+	lastPackage = timestamp;
         break;
     }
     case mtSpectData:
@@ -435,6 +439,7 @@ void SonarInterface::processMessage(uint8_t *message) {
         break;
     case mtAlive:
         lastKeepAlive = timestamp;
+	requestData();
         fprintf(stderr,"Got an Alive packet, Found Sonar!\n");
         break;
     case mtPrgAck:

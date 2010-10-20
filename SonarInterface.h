@@ -112,6 +112,7 @@ public:
 	void reboot();
 
         base::Time lastKeepAlive;
+	base::Time lastPackage;
 
 private:
 	bool initialized;
@@ -129,6 +130,7 @@ private:
 	static const int MAX_PACKET_SIZE = 9048;
 	virtual int extractPacket(uint8_t const* buffer, size_t buffer_size) const;
 
+	uint8_t currentMotorStepAngleSize;
     uint8_t headData[68];
     bool headDataChanged;
 
