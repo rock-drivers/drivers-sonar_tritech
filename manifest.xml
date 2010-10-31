@@ -1,5 +1,5 @@
 <package>
-  <description brief="GUI for Joystik based motion control"></description>
+  <description brief="Tritech Micron Driver"></description>
   <author>Matthias Goldhoorn/matthias.goldhoorn@dfki.de</author>
   <license></license>
   <url>http://spacegit.dfki.uni-bremen.de/dfki-drivers/micron</url>
