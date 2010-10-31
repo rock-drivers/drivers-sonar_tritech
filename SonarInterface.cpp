@@ -1,3 +1,10 @@
+/**
+ * Author: Matthias Goldhoorn (matthias.goldhoorn@dfki.de)
+ * Company: Deutsches Forschungszentrum für Künstliche Intelligenz - Robotics Innovation Center (DFKI RIC)
+ * Year 2010
+ * Desc:
+ *
+*/
 #include "SonarInterface.h"
 #include <stdio.h>
 #include <string.h>
