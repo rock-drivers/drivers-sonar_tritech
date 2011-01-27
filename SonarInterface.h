@@ -13,12 +13,17 @@
 #include <iodrivers_base.hh>
 #include <base/time.h>
 
+typedef uint16_t u16;
+typedef uint8_t  u8;
+typedef uint32_t u32;
+
 class SonarInterface;
 
 class SonarHandler{
 	public:
 	virtual void processDepth(base::Time const& time, double depth)=0;
 	virtual void processSonarScan(SonarScan const&)=0;
+	virtual void processSonarScan(ProfilerScan const&)=0;
 };
 
 static int MsgLength[] = {
@@ -107,10 +112,12 @@ public:
 	SonarInterface();
 	~SonarInterface();
 	void requestVersion();
-	void sendHeadData(bool adc8on=true,bool cont=true,bool scanright=false,bool invert=false,bool chan2=false,bool applyoffset=false,
-	bool pingpong=false,uint16_t rangeScale=30, uint16_t leftLimit=1, uint16_t rightLimit=6399, uint8_t adSpan=false, 
-	uint8_t adLow=8, uint8_t initialGain=84, uint8_t motorStepDelayTime=25, uint8_t motorStepAngleSize=16,
-	uint16_t adInterval=20, uint16_t numberOfBins=600, uint16_t adcSetpoint=0);
+	void sendHeadData(bool adc8on=true,bool cont=true,bool scanright=false,bool invert=false,bool chan2=false,bool applyoffset=false, bool pingpong=false,uint16_t rangeScale=30, uint16_t leftLimit=1, uint16_t rightLimit=6399, uint8_t adSpan=false, uint8_t adLow=8, uint8_t initialGain=84, uint8_t motorStepDelayTime=25, uint8_t motorStepAngleSize=16,uint16_t adInterval=20, uint16_t numberOfBins=10, uint16_t adcSetpoint=0);
+	
+	//void sendHeadDataProfiling(uint16_t txPulseLength=30,uint16_t rangeScale=20,uint16_t leftLimit=2134, uint16_t rightLimit=4266, uint8_t adThreashold = 50, uint8_t filterGain=1, uint8_t maxAge=107, uint8_t setPoint=100, uint8_t motorTime=25, uint8_t stepSize=16);
+	void sendHeadDataProfiling(uint16_t txPulseLength=30,uint16_t rangeScale=20,uint16_t leftLimit=0, uint16_t rightLimit=6399, uint8_t adThreashold = 50, uint8_t filterGain=1, uint8_t maxAge=107, uint8_t setPoint=100, uint8_t motorTime=25, uint8_t stepSize=16);
+
+
 	void requestData();
 	void registerHandler(SonarHandler*);
 	void unregisterHandler(SonarHandler*);
@@ -126,6 +133,7 @@ private:
 	int waitCounter;
 	void notifyPeers(base::Time const& time, float depth);
 	void notifyPeers(SonarScan const& scan);
+	void notifyPeers(ProfilerScan const& scan);
 	uint8_t scanData[6369*256];	
 	std::list<SonarHandler*> handlers;
 	void sendPacked(MsgType type,uint8_t *data);
@@ -134,12 +142,12 @@ private:
 	uint8_t txNode;
 	uint8_t rxNode;
 	int fileCnt;
-	static const int MAX_PACKET_SIZE = 9048;
+	static const int MAX_PACKET_SIZE = 5000;
 	virtual int extractPacket(uint8_t const* buffer, size_t buffer_size) const;
 
 	uint8_t currentMotorStepAngleSize;
     uint8_t headData[68];
-    bool headDataChanged;
+    bool headDataChanged,profileHeadDataChanged;
 
 /* Sonar informations */
       /* Informations from HeadCommand */

@@ -16,7 +16,8 @@ SonarInterface::SonarInterface():
   IODriver(MAX_PACKET_SIZE,false)
 {
     //Device Adresses
-    rxNode = 0x02;
+    rxNode = 0x14;
+    //rxNode = 0x02;
     txNode = 0xFF;
     timeCnt=0;
     fileCnt=0;
@@ -42,13 +43,100 @@ void SonarInterface::requestData() {
    	sendPacked(mtHeadCommand,headData);
     sendPacked(mtSendData,0);
 }
+	
+
+//void sendHeadDataProfiling(uint16_t txPulseLength=30,uint16_t rangeScale=2,uint16_t leftLimit=2134, uint16_t rightLimit=4266, uint8_t adThreashold = 50, uint8_t filterGain=1, uint8_t maxAge=107, uint8_t setPoint=100, uint8_t motorTime=25, uint8_t stepSize=16){
+
+void SonarInterface::sendHeadDataProfiling(uint16_t txPulseLength,uint16_t rangeScale,uint16_t leftLimit, uint16_t rightLimit, uint8_t adThreashold , uint8_t filterGain, uint8_t maxAge, uint8_t setPoint, uint8_t motorTime, uint8_t stepSize){
+	uint8_t V3BParams = 0x1D;
+	u16 headControl = 8964;
+	u8 headType = 5;
+	u32 txnch1 = 77846282;
+	u32 txnch2 = 162403450;
+	u32 rxnch1 = 138915348;
+	u32 rxnch2 = 223472517;
+	//Pule Length
+	//rangeScale
+	//LeftLimit
+	//RightLimit
+	//ad threash
+	//Filter Gain
+	//Max Age
+	//set Point
+	u16 slopeCh1 = 110;
+	u16 slopeCh2 = 150;
+	//motor Time;
+	//stepSize
+	u16 scanTime = 30;
+	u16 PrfSpl = 0;
+	u16 PrfCtl2 = 0;
+	u16 lockout= 500;
+	u16 minorAxisDir = 1600;
+	u8 majorAxisPan = 1;
+	u8 ctl2 = 0;
+	u8 scanZ = 0;
+	u8 adThrCh1 = 0x32;
+	u8 adThrCh2 = 0x32;
+	u8 filterGainCh1 = 1;
+	u8 filterGainCh2 = 1;
+	u8 maxAgeCh1= 0x6b;
+	u8 maxAgeCh2= 0x6b;
+	u8 setPointCh1= 0x64;
+	u8 setPointCh2= 0x64;
+	u16 slope_Ch1 = 110;
+	u16 slope_Ch2 = 150;
+	u16 slopeDelayCh1 = 0;
+	u16 slopeDelayCh2 = 0;
+
+    	int pos=0;
+    	memcpy(headData+pos,&V3BParams,1); pos+=1;
+    	memcpy(headData+pos,&headControl,2); pos+=2;
+    	memcpy(headData+pos,&headType,1); pos+=1;
+    	memcpy(headData+pos,&txnch1,4); pos+=4;
+    	memcpy(headData+pos,&txnch2,4); pos+=4;
+    	memcpy(headData+pos,&rxnch1,4); pos+=4;
+    	memcpy(headData+pos,&rxnch2,4); pos+=4;
+    	memcpy(headData+pos,&txPulseLength,2); pos+=2;
+    	memcpy(headData+pos,&rangeScale,2); pos+=2;
+    	memcpy(headData+pos,&leftLimit,2); pos+=2;
+    	memcpy(headData+pos,&rightLimit,2); pos+=2;
+    	memcpy(headData+pos,&adThreashold,1); pos+=1;
+    	memcpy(headData+pos,&filterGain,1); pos+=1;
+    	memcpy(headData+pos,&maxAge,1); pos+=1;
+    	memcpy(headData+pos,&setPoint,1); pos+=1;
+    	memcpy(headData+pos,&slopeCh1,2); pos+=2;
+    	memcpy(headData+pos,&slopeCh2,2); pos+=2;
+    	memcpy(headData+pos,&motorTime,1); pos+=1;
+    	memcpy(headData+pos,&stepSize,1); pos+=1;
+    	memcpy(headData+pos,&scanTime,2); pos+=2;
+    	memcpy(headData+pos,&PrfSpl,2); pos+=2;
+    	memcpy(headData+pos,&PrfCtl2,2); pos+=2;
+    	memcpy(headData+pos,&lockout,2); pos+=2;
+    	memcpy(headData+pos,&minorAxisDir,2); pos+=2;
+    	memcpy(headData+pos,&majorAxisPan,1); pos+=1;
+    	memcpy(headData+pos,&ctl2,1); pos+=1;
+    	memcpy(headData+pos,&scanZ,2); pos+=2;
+    	memcpy(headData+pos,&adThrCh1,1); pos+=1;
+    	memcpy(headData+pos,&adThrCh2,1); pos+=1;
+    	memcpy(headData+pos,&filterGainCh1,1); pos+=1;
+    	memcpy(headData+pos,&filterGainCh2,1); pos+=1;
+    	memcpy(headData+pos,&maxAgeCh1,1); pos+=1;
+    	memcpy(headData+pos,&maxAgeCh2,1); pos+=1;
+    	memcpy(headData+pos,&setPointCh1,1); pos+=1;
+    	memcpy(headData+pos,&setPointCh2,1); pos+=1;
+    	memcpy(headData+pos,&slope_Ch1,2); pos+=2;
+    	memcpy(headData+pos,&slope_Ch2,2); pos+=2;
+    	memcpy(headData+pos,&slopeDelayCh1,2); pos+=2;
+    	memcpy(headData+pos,&slopeDelayCh2,2); pos+=2;
+	headDataChanged=true;	
+}
+   
 
 void SonarInterface::sendHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,
 		bool pingpong,uint16_t rangeScale, uint16_t leftLimit, uint16_t rightLimit, uint8_t adSpan, 
 		uint8_t adLow, uint8_t initialGain, uint8_t motorStepDelayTime, uint8_t motorStepAngleSize,
 		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint) {
 
-   
     currentMotorStepAngleSize = motorStepAngleSize;
     uint8_t V3BParams = 0x1D;
     //bool adc8on = true;
@@ -300,6 +388,7 @@ void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
         msg[12] = rxNode;
         memcpy(msg+13,data,68);
         msg[81] = 0x0A;
+	headDataChanged=false;
         break;
         /*
         case mtEraseSector:
@@ -343,19 +432,21 @@ void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
     if (!written) {
         fprintf(stderr,"Couldn't send Packet\n");
     } else {
-        /*
-	fprintf(stdout,"Sended packet with length: %i\n",(length+6));
-        for (int i=0;i< length+6;i++) {
-            fprintf(stdout,"%02X ",msg[i]);
-        }
-        fprintf(stdout,"\n");
-	*/
+        
+	//fprintf(stdout,"Sended packet with length: %i\n",(length+6));
+        //for (int i=0;i< length+6;i++) {
+        //    fprintf(stdout,"%02X ",msg[i]);
+        //}
+        //fprintf(stdout,"\n");
+	
     }
 
 }
 
 bool SonarInterface::processSerialData(int timeout){
 	uint8_t packed[MAX_PACKET_SIZE];
+	for(int i=0;i<MAX_PACKET_SIZE;i++)packed[i]=0;
+
 	try{
 		readPacket(packed,MAX_PACKET_SIZE,timeout,timeout);
 		processMessage(packed);
@@ -372,6 +463,7 @@ bool SonarInterface::processSerialData(int timeout){
 void SonarInterface::processMessage(uint8_t *message) {
 
     base::Time timestamp = base::Time::now();
+    uint8_t nodeType = message[12];
     uint8_t type = message[10];
 
     switch (type) {
@@ -399,46 +491,87 @@ void SonarInterface::processMessage(uint8_t *message) {
     {
     	uint16_t packedSize    = message[13] | (message[14]<<8);
     	uint8_t deviceType     = message[15];
-    	uint8_t headStatus     = message[16];
-    	uint8_t sweepCode      = message[17];
-    	uint16_t headControl   = message[18] | (message[19]<<8);
-    	uint16_t range         = message[20] | (message[21]<<8);
-    	uint32_t txn           = message[22] | (message[23]<<8) | (message[24]<<16) | (message[25]<<24);
-    	uint8_t gain           = message[26];
-    	uint16_t slope         = message[27] | (message[28]<<8);
-    	uint8_t adSpawn        = message[29];
-    	uint8_t adLow          = message[30];
-    	uint16_t headingOffset = message[31] | (message[32]<<8);
-    	uint16_t adInterval    = message[33] | (message[34]<<8);
-    	uint16_t leftLimit     = message[35] | (message[36]<<8);
-    	uint16_t rightLimit    = message[37] | (message[38]<<8);
-    	uint8_t steps          = message[39];
-    	uint16_t bearing       = message[40] | (message[41]<<8);
-    	uint16_t dataBytes     = message[42] | (message[43]<<8);
-    	uint8_t *scanData      = message+44;
+	printf("Got Type: %i\n",nodeType);
+	if(nodeType==0x02){ //Scanning sonar
+		uint8_t headStatus     = message[16];
+		uint8_t sweepCode      = message[17];
+		uint16_t headControl   = message[18] | (message[19]<<8);
+		uint16_t range         = message[20] | (message[21]<<8);
+		uint32_t txn           = message[22] | (message[23]<<8) | (message[24]<<16) | (message[25]<<24);
+		uint8_t gain           = message[26];
+		uint16_t slope         = message[27] | (message[28]<<8);
+		uint8_t adSpawn        = message[29];
+		uint8_t adLow          = message[30];
+		uint16_t headingOffset = message[31] | (message[32]<<8);
+		uint16_t adInterval    = message[33] | (message[34]<<8);
+		uint16_t leftLimit     = message[35] | (message[36]<<8);
+		uint16_t rightLimit    = message[37] | (message[38]<<8);
+		uint8_t steps          = message[39];
+		uint16_t bearing       = message[40] | (message[41]<<8);
+		uint16_t dataBytes     = message[42] | (message[43]<<8);
+		uint8_t *scanData      = message+44;
+		
+		//uint8_t debug[dataBytes];
+		
+		//for(int i=0;i<dataBytes;i++){
+		//	debug[i]=i;
+		//}
+		
+		SonarScan scan(packedSize,deviceType,headStatus,sweepCode,headControl,
+			range,txn,gain,slope,adSpawn,adLow,headingOffset,adInterval,
+			leftLimit,rightLimit,steps,bearing,dataBytes,scanData);
+		scan.time = timestamp;
+		notifyPeers(scan);
+		
+		//uint8_t data[dataBytes];
+		//memcpy(data,scanData,dataBytes);
+		//fprintf(stdout,"Actual Bearing: %u.\n",bearing);
+		//fprintf(stdout,"DataBytes recived: %u.\n",dataBytes);
+		 
+		//fprintf(stderr,"Cannot handle HeadData-Packet\n");
+		
+		base::Time delta = timestamp-lastPackage;
+		printf("Time between now %f fullscan: %f\n",delta.toSeconds(),delta.toSeconds()*6400.0/(double)currentMotorStepAngleSize);
+		lastPackage = timestamp;
+	}else if(nodeType== 0x14){
+		
+		uint8_t headStatus     	= message[16];
+		uint8_t sweep		= message[17];
+		uint16_t headControl   	= message[18] | (message[19]<<8);
+		uint16_t range		= message[20] | (message[21]<<8);
+		uint32_t txn           	= message[22] | (message[23]<<8) | (message[24]<<16) | (message[25]<<24);
+		uint8_t gain           	= message[26];
+		uint16_t slope          = message[27] | (message[28]<<8);
+		uint8_t adThrs         	= message[29];
+		uint8_t filterGain     	= message[30];
+		uint16_t leftLim        = message[31] | (message[32]<<8);
+		uint16_t rightLim       = message[33] | (message[34]<<8);
+		uint8_t  stepSize      	= message[35];
+		uint16_t scanTime       = message[36] | (message[37]<<8);
+		uint16_t noPings        = message[38] | (message[39]<<8);
+		uint8_t *scanData	= message+40;
+		uint16_t dataEnd = 40+(noPings*2);
+		if(message[dataEnd+10] != 0x0A){	
+			printf("Bla: %c\n",message[0]);
+			for(int i=dataEnd-2;i<dataEnd+20;i++){
+				printf(" %02x",message[i]);
+			}
+			printf("\n");
+			printf("No of Pings: %i, len %i\n",noPings,packedSize);
+			fprintf(stderr,"Cannot Parse Head message\n");
+		}else{
+			uint16_t data[noPings];
+			for(int i=0;i<noPings;i++){
+				data[i] = message[40+(i*2)] | (message[41+(i*2)]<<8);
+			}
+			notifyPeers(ProfilerScan(range,txn,gain,leftLim,rightLim,stepSize,scanTime,noPings,data));
+			//printf("korrekt\n");
+
+		}	
 	
-	//uint8_t debug[dataBytes];
-	
-	//for(int i=0;i<dataBytes;i++){
-	//	debug[i]=i;
-	//}
-	
-	SonarScan scan(packedSize,deviceType,headStatus,sweepCode,headControl,
-                range,txn,gain,slope,adSpawn,adLow,headingOffset,adInterval,
-                leftLimit,rightLimit,steps,bearing,dataBytes,scanData);
-        scan.time = timestamp;
-	notifyPeers(scan);
-	
-        //uint8_t data[dataBytes];
-        //memcpy(data,scanData,dataBytes);
-        //fprintf(stdout,"Actual Bearing: %u.\n",bearing);
-        //fprintf(stdout,"DataBytes recived: %u.\n",dataBytes);
-      	 
-        //fprintf(stderr,"Cannot handle HeadData-Packet\n");
-	
-	base::Time delta = timestamp-lastPackage;
-	printf("Time between now %f fullscan: %f\n",delta.toSeconds(),delta.toSeconds()*6400.0/(double)currentMotorStepAngleSize);
-	lastPackage = timestamp;
+	}else{
+		fprintf(stderr,"Unknown Device\n");
+	}
         break;
     }
     case mtSpectData:
@@ -554,6 +687,12 @@ void SonarInterface::notifyPeers(SonarScan const& scan){
 	}
 }
 
+void SonarInterface::notifyPeers(ProfilerScan const& scan){
+	for(std::list<SonarHandler*>::iterator it = handlers.begin(); it != handlers.end();it++){
+		(*it)->processSonarScan(scan);
+	}
+}
+
 bool SonarInterface::init(std::string const &port){
 	return openSerial(port,115200);
 }
@@ -565,7 +704,8 @@ int SonarInterface::extractPacket(uint8_t const* buffer, size_t buffer_size) con
 	
 	if(buffer_size<7) return 0;
 	
-	int readPos=0;
+		
+	size_t readPos=0;
 	while (buffer[readPos] != '@' && readPos < buffer_size) {
 		readPos++;
         }
@@ -576,27 +716,41 @@ int SonarInterface::extractPacket(uint8_t const* buffer, size_t buffer_size) con
 	}
 */
 	if(readPos>0){
-		//fprintf(stdout,"Skipping %i bytes.\n",readPos);
+		fprintf(stdout,"Skipping %i bytes.\n",readPos);
             	//for (int i=0;i<readPos;i++)
                 //	fprintf(stderr,"%02X ",buffer[i]);
 		//fprintf(stderr,"\n");
+		printf("packet at readPos: (%c) (%02x)\n",buffer[readPos],buffer[readPos]);
 		return -readPos;
 	}
+	
 	//Double check length... with other lengh information
         uint16_t len = (buffer[5] | (buffer[6]<<8 )) +5;
 	uint16_t hexlen = 0;
 	char hexsum[5];
 	memcpy(hexsum,buffer+1,4);
 	hexsum[4]=0;
-
-	sscanf(hexsum,"%x",(unsigned int*)&hexlen);
-//	printf("bla: %c,%c,%c,%c\n",buffer[1],buffer[2],buffer[3],buffer[4]);
-//	printf("Checks: %i,%i\n",len, hexlen);
+	
+	sscanf(hexsum,"%hx",&hexlen);
+	//printf("Checks: %i,%i\n",len, hexlen);
 	if(len-5 != hexlen){
-		//printf("Kaput\n");
+		printf("Kaput %i\n", buffer_size);
+		printf("hex: %c%c%c%c\n",buffer[1],buffer[2],buffer[3],buffer[4]);
+		printf("hex: %x %x %x %x\n",buffer[1],buffer[2],buffer[3],buffer[4]);
+		printf("bin: %i %i\n",buffer[5],buffer[6]);
+		printf("0x%02x (%c)\n",buffer[0],buffer[0]);
+		printf("len is: %hu, hexlen is %hu\n",len-5,hexlen);
 		//Seems this is not the real packed start so we skip...
+		
+		fprintf(stdout,"Message:\n");
+            	for (unsigned int i=0;i<buffer_size;i++)
+                	fprintf(stderr,"%02X ",buffer[i]);
+		fprintf(stderr,"\n");
 		return -1;
+	}else{
+		int32_t bla = len;
 	}
+	
 	if(len+1 > buffer_size){
 		//printf("Not complete yet (%i)\n",len+1);
 		//Packed Start correct, but not complete yet
@@ -618,5 +772,5 @@ int SonarInterface::extractPacket(uint8_t const* buffer, size_t buffer_size) con
 	    return -1;
         }
 	printf("Hops darf nie passieren\n");
-	//return -1;
+	return -1;
 }

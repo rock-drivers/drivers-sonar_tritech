@@ -9,6 +9,8 @@ LINK_DIRECTORIES(${IO_LIBRARY_DIRS})
 find_package(Boost COMPONENTS thread REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
+ADD_DEFINITIONS(-O0 -Wall)
+
 add_library(micron SHARED
 	SonarInterface.cpp
 	SonarScan.cpp

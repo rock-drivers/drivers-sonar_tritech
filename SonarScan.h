@@ -12,6 +12,34 @@
 #include <base/time.h>
 #include <vector>
 
+
+class ProfilerScan{
+public:
+	base::Time time;
+	uint16_t range;
+	uint32_t TxN;
+	uint8_t gain;
+	uint16_t leftLimit;
+	uint16_t rightLimit;
+	uint8_t stepSize;
+	uint16_t scanTime;
+	std::vector<uint16_t> scanData;
+
+
+ProfilerScan(
+	uint16_t range,
+	uint32_t TxN,
+	uint8_t gain,
+	uint16_t leftLimit,
+	uint16_t rightLimit,
+	uint8_t stepSize,
+	uint16_t scanTime,
+	uint16_t dataSize,
+	uint16_t *data
+);
+
+};
+
 class SonarScan {
 public:
     base::Time time;

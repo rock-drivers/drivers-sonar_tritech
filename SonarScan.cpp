@@ -95,6 +95,29 @@ SonarScan::SonarScan(
     memcpy(&this->scanData[0], scanData, dataBytes);
 }
 
+
+ProfilerScan::ProfilerScan(
+	uint16_t range,
+	uint32_t TxN,
+	uint8_t gain,
+	uint16_t leftLimit,
+	uint16_t rightLimit,
+	uint8_t stepSize,
+	uint16_t scanTime,
+	uint16_t dataSize,
+	uint16_t *data
+):
+range(range),
+TxN(TxN),
+gain(gain),
+leftLimit(leftLimit),
+rightLimit(rightLimit),
+stepSize(stepSize),
+scanTime(scanTime){
+	this->scanData.resize(dataSize);
+	memcpy(&this->scanData[0],data,dataSize);
+}
+
 double SonarScan::getScale() const
 {
   return  (((scanData.size()*adInterval*640.0)/1000000000.0)*1500.0/2.0)/scanData.size();
