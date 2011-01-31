@@ -5,14 +5,14 @@
  * Desc:
  *
 */
-#include "SonarInterface.h"
+#include "MicronInterface.h"
 #include <stdio.h>
 #include <string.h>
 #include <boost/thread/thread.hpp>
 
 #define WRITETIMEOUT 200
 
-SonarInterface::SonarInterface(): 
+MicronInterface::MicronInterface(): 
   IODriver(MAX_PACKET_SIZE,false)
 {
     //Device Adresses
@@ -25,20 +25,25 @@ SonarInterface::SonarInterface():
     initialized=false;
 }
 
-SonarInterface::~SonarInterface() {
+MicronInterface::~MicronInterface() {
 }
 
-void SonarInterface::reboot()
+
+void MicronInterface::processHeadData(u8 *message){
+}
+
+
+void MicronInterface::reboot()
 {
     sendPacked(mtReBoot,0);
 }
 
-void SonarInterface::requestVersion()
+void MicronInterface::requestVersion()
 {
     sendPacked(mtSendVersion,0);
 }
 
-void SonarInterface::requestData() {
+void MicronInterface::requestData() {
     if(headDataChanged)
    	sendPacked(mtHeadCommand,headData);
     sendPacked(mtSendData,0);
@@ -47,7 +52,7 @@ void SonarInterface::requestData() {
 
 //void sendHeadDataProfiling(uint16_t txPulseLength=30,uint16_t rangeScale=2,uint16_t leftLimit=2134, uint16_t rightLimit=4266, uint8_t adThreashold = 50, uint8_t filterGain=1, uint8_t maxAge=107, uint8_t setPoint=100, uint8_t motorTime=25, uint8_t stepSize=16){
 
-void SonarInterface::sendHeadDataProfiling(uint16_t txPulseLength,uint16_t rangeScale,uint16_t leftLimit, uint16_t rightLimit, uint8_t adThreashold , uint8_t filterGain, uint8_t maxAge, uint8_t setPoint, uint8_t motorTime, uint8_t stepSize){
+void MicronInterface::sendHeadDataProfiling(uint16_t txPulseLength,uint16_t rangeScale,uint16_t leftLimit, uint16_t rightLimit, uint8_t adThreashold , uint8_t filterGain, uint8_t maxAge, uint8_t setPoint, uint8_t motorTime, uint8_t stepSize){
 	uint8_t V3BParams = 0x1D;
 	u16 headControl = 8964;
 	u8 headType = 5;
@@ -132,7 +137,7 @@ void SonarInterface::sendHeadDataProfiling(uint16_t txPulseLength,uint16_t range
 }
    
 
-void SonarInterface::sendHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,
+void MicronInterface::sendHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,
 		bool pingpong,uint16_t rangeScale, uint16_t leftLimit, uint16_t rightLimit, uint8_t adSpan, 
 		uint8_t adLow, uint8_t initialGain, uint8_t motorStepDelayTime, uint8_t motorStepAngleSize,
 		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint) {
@@ -325,7 +330,7 @@ fprintf(stdout,"\n%s,%s,%s,%s,%s,%s,%s,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u\n",mcr->
    //sendPacked(mtHeadCommand,headData);
 }
 
-void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
+void MicronInterface::sendPacked(MsgType type, uint8_t *data) {
 
     uint16_t length = 5+MsgLength[type]; //TODO
     uint8_t msg[length+6];
@@ -443,7 +448,7 @@ void SonarInterface::sendPacked(MsgType type, uint8_t *data) {
 
 }
 
-bool SonarInterface::processSerialData(int timeout){
+bool MicronInterface::processSerialData(int timeout){
 	uint8_t packed[MAX_PACKET_SIZE];
 	for(int i=0;i<MAX_PACKET_SIZE;i++)packed[i]=0;
 
@@ -460,7 +465,7 @@ bool SonarInterface::processSerialData(int timeout){
 /**
  * Given message started on binary lengh field
  **/
-void SonarInterface::processMessage(uint8_t *message) {
+void MicronInterface::processMessage(uint8_t *message) {
 
     base::Time timestamp = base::Time::now();
     uint8_t nodeType = message[12];
@@ -666,38 +671,38 @@ void SonarInterface::processMessage(uint8_t *message) {
 }
 
 
-void SonarInterface::registerHandler(SonarHandler *handler){
+void MicronInterface::registerHandler(SonarHandler *handler){
 	handlers.push_back(handler);
 }
 
-void SonarInterface::unregisterHandler(SonarHandler *handler){
+void MicronInterface::unregisterHandler(SonarHandler *handler){
 	handlers.remove(handler);
 }
 
 
-void SonarInterface::notifyPeers(base::Time const& time, float newDepth){
+void MicronInterface::notifyPeers(base::Time const& time, float newDepth){
 	for(std::list<SonarHandler*>::iterator it =  handlers.begin(); it != handlers.end();it++){
 		(*it)->processDepth(time, newDepth);
 	}
 }
 
-void SonarInterface::notifyPeers(SonarScan const& scan){
+void MicronInterface::notifyPeers(SonarScan const& scan){
 	for(std::list<SonarHandler*>::iterator it = handlers.begin(); it != handlers.end();it++){
 		(*it)->processSonarScan(scan);
 	}
 }
 
-void SonarInterface::notifyPeers(ProfilerScan const& scan){
+void MicronInterface::notifyPeers(ProfilerScan const& scan){
 	for(std::list<SonarHandler*>::iterator it = handlers.begin(); it != handlers.end();it++){
 		(*it)->processSonarScan(scan);
 	}
 }
 
-bool SonarInterface::init(std::string const &port){
+bool MicronInterface::init(std::string const &port){
 	return openSerial(port,115200);
 }
 
-int SonarInterface::extractPacket(uint8_t const* buffer, size_t buffer_size) const{
+int MicronInterface::extractPacket(uint8_t const* buffer, size_t buffer_size) const{
 
 //	if(buffer_size > 2000) { printf("HUCH: %i,",buffer_size); return -1;}
 //	printf("size: %i \n",buffer_size);

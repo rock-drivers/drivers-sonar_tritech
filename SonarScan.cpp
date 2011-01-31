@@ -1,4 +1,4 @@
-/**
+/*
  * Author: Matthias Goldhoorn (matthias.goldhoorn@dfki.de)
  * Company: Deutsches Forschungszentrum für Künstliche Intelligenz - Robotics Innovation Center (DFKI RIC)
  * Year 2010
@@ -8,7 +8,7 @@
 #include "SonarScan.h"
 #include <string.h>
 
-SonarScan::SonarScan(SonarScan const& other):
+MicronScan::MicronScan(MicronScan const& other):
 	packedSize(other.packedSize),
 	deviceType(other.deviceType),
 	headStatus(other.headStatus),
@@ -30,7 +30,7 @@ SonarScan::SonarScan(SonarScan const& other):
     scanData = other.scanData;
 }
 
-SonarScan::SonarScan():
+MicronScan::MicronScan():
 	packedSize(0),
 	deviceType(0),
 	headStatus(0),
@@ -52,7 +52,7 @@ SonarScan::SonarScan():
 
 }
 
-SonarScan::SonarScan(
+MicronScan::MicronScan(
 	uint16_t packedSize,
 	uint8_t deviceType,
 	uint8_t headStatus,
@@ -118,12 +118,13 @@ scanTime(scanTime){
 	memcpy(&this->scanData[0],data,dataSize);
 }
 
-double SonarScan::getScale() const
+double MicronScan::getScale() const
 {
   return  (((scanData.size()*adInterval*640.0)/1000000000.0)*1500.0/2.0)/scanData.size();
 }
 
-std::ostream& operator<<(std::ostream &stream, const SonarScan& scan){ 
+/*
+std::ostream& operator<<(std::ostream &stream, const MicronScan& scan){ 
   stream << scan.packedSize;
   stream << scan.deviceType;
   stream << scan.headStatus;
@@ -146,9 +147,9 @@ std::ostream& operator<<(std::ostream &stream, const SonarScan& scan){
   	stream << scan.scanData[i];	
   return stream;
 }
-
-
-std::istream& operator>>(std::istream& stream, SonarScan& scan){
+*/
+/*
+std::istream& operator>>(std::istream& stream, MicronScan& scan){
   //stream >> scan.packedSize;
   //stream >> scan.deviceType;
   //stream >> scan.headStatus;
@@ -175,4 +176,4 @@ std::istream& operator>>(std::istream& stream, SonarScan& scan){
   return stream;
 }
 
-
+*/

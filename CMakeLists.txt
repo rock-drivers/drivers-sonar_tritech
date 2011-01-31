@@ -12,13 +12,15 @@ include_directories(${Boost_INCLUDE_DIRS})
 ADD_DEFINITIONS(-O0 -Wall)
 
 add_library(micron SHARED
-	SonarInterface.cpp
+	SeaNet.cpp
+	Micron.cpp
 	SonarScan.cpp
 	MicronConfiguration.cpp
 )
 
 add_executable(micronTest
-	SonarInterface.cpp
+	SeaNet.cpp
+	Micron.cpp
 	SonarScan.cpp
 	MicronConfiguration.cpp
 	main.cpp
@@ -39,7 +41,7 @@ INSTALL(TARGETS micron
 	LIBRARY DESTINATION lib
 )
 
-INSTALL(FILES SonarScan.h MicronConfiguration.h SonarInterface.h DESTINATION include)
+INSTALL(FILES SonarScan.h MicronConfiguration.h SeaNet.h Micron.h DESTINATION include)
 
 CONFIGURE_FILE(micron.pc.in micron.pc @ONLY)
 

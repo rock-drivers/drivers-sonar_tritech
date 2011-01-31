@@ -13,7 +13,11 @@
 #include <vector>
 
 
-class ProfilerScan{
+
+class SonarScan{
+};
+
+class ProfilerScan: public SonarScan{
 public:
 	base::Time time;
 	uint16_t range;
@@ -40,15 +44,15 @@ ProfilerScan(
 
 };
 
-class SonarScan {
+class MicronScan : public SonarScan{
 public:
     base::Time time;
 
-SonarScan();
+MicronScan();
 
-SonarScan(SonarScan const& other);
+MicronScan(MicronScan const& other);
 
-SonarScan(
+MicronScan(
 	uint16_t packedSize,
 	uint8_t deviceType,
 	uint8_t headStatus,
@@ -92,7 +96,7 @@ SonarScan(
 	double getScale() const;
 };
 
-std::ostream& operator<<(std::ostream &stream, const SonarScan& scan);
-std::istream& operator>>(std::istream& stream, SonarScan& scan);
+//std::ostream& operator<<(std::ostream &stream, const SonarScan& scan);
+//std::istream& operator>>(std::istream& stream, SonarScan& scan);
 
 #endif

@@ -6,26 +6,31 @@
  *
 */
 #include <stdio.h>
-#include "SonarInterface.h"
+#include "Micron.h"
 #include <stdlib.h>
 
-class Interface: public SonarHandler{
+
+class Interface : public SeaNet::SonarHandler{
 	public:
 	Interface(){
 	}
-
+/*
 	void processDepth(base::Time const& time, double depth){
 		printf("Got Ground distance: %f\n",depth);
 	}
-
-	void processSonarScan(SonarScan const& scan){
+*/
+	void processSonarScan(SonarScan const *scan){
+		printf("Hot something in callbacl\n");
+		/*
+		const MicronScan *micron = dynamic_cast<const MicronScan*>(scan);
 		printf("Got Scan\n");
-		for(unsigned int i=0;i<scan.scanData.size();i++){
-			printf("%hu ",scan.scanData[i]);
+		for(unsigned int i=0;i<micron.scanData.size();i++){
+			printf("%hu ",micron.scanData[i]);
 		}
 		printf("\n");
+		*/
 	};
-	
+/*	
 	virtual void processSonarScan(ProfilerScan const& scan){
 		printf("Got Profiler Scan\n");
 		for(unsigned int i=0;i<scan.scanData.size();i++){
@@ -33,11 +38,12 @@ class Interface: public SonarHandler{
 		}
 		printf("\n");
 	}
+*/
 };
 
 
 int main(int argc, char* argv[]) {
-  SonarInterface si;
+  SeaNet::Micron si;
   Interface i;
   si.init(std::string(argv[1]));
  /* 
@@ -51,10 +57,8 @@ int main(int argc, char* argv[]) {
   }else{
   */
   si.registerHandler(&i);
-  //si.sendHeadData(); 
-  si.sendHeadDataProfiling();
-  si.sendHeadDataProfiling();
-    //si.requestData();
+  si.sendHeadData(); 
+    si.requestData();
     while(1){
       try {
 	si.processSerialData(1000);
