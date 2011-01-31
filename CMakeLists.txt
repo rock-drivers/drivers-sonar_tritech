@@ -11,7 +11,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 ADD_DEFINITIONS(-O0 -Wall)
 
-add_library(micron SHARED
+add_library(seanet SHARED
 	SeaNet.cpp
 	Micron.cpp
 	Profiling.cpp
@@ -37,7 +37,7 @@ add_executable(profilingTest
 	main-profiling.cpp
 )
 
-TARGET_LINK_LIBRARIES(micron
+TARGET_LINK_LIBRARIES(seanet
 	${IO_LIBRARIES}
 	${Boost_LIBRARIES}
 )
@@ -53,15 +53,15 @@ TARGET_LINK_LIBRARIES(profilingTest
 )
 
 
-INSTALL(TARGETS micron 
+INSTALL(TARGETS seanet 
 	LIBRARY DESTINATION lib
 )
 
 INSTALL(FILES SonarScan.h MicronConfiguration.h SeaNet.h Micron.h Profiling.h DESTINATION include)
 
-CONFIGURE_FILE(micron.pc.in micron.pc @ONLY)
+CONFIGURE_FILE(seanet.pc.in seanet.pc @ONLY)
 
 INSTALL(FILES 
-	${CMAKE_BINARY_DIR}/micron.pc 
+	${CMAKE_BINARY_DIR}/seanet.pc 
 	DESTINATION lib/pkgconfig
 )

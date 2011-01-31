@@ -3,8 +3,8 @@ exec_prefix=@CMAKE_INSTALL_PREFIX@
 libdir=${prefix}/lib
 includedir=${prefix}/include
 
-Name: micron 
-Description: Micron Scanning Sonar and Pinger Library for Interface to Physical device 
+Name: seanet 
+Description: SeaNet Library for the SeaNet Communication Protocol that is used by different Tritech Products 
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -lmicron
+Libs: -L${libdir} -lseanet
 Cflags: -I${includedir}
