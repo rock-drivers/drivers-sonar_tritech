@@ -371,12 +371,7 @@ int Protocol::extractPacket(uint8_t const* buffer, size_t buffer_size) const{
 	}
 
         if (buffer[len] == 0x0A || buffer[10] == 0x08) {
-	    if(buffer[10] == 0x08){
-	    	//fprintf(stdout,"Echosounder complete\n");
-	    	return len;
-	    }else{
             	return len+1;
-	    }
         } else {
             fprintf(stderr,"Message doesn't ended with an newline was(%lu): %02X, skip message:\n",len,buffer[len]);
             //for (int i=0;i<buffer_size;i++)
