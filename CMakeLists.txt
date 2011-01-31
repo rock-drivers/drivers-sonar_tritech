@@ -14,6 +14,7 @@ ADD_DEFINITIONS(-O0 -Wall)
 add_library(micron SHARED
 	SeaNet.cpp
 	Micron.cpp
+	Profiling.cpp
 	SonarScan.cpp
 	MicronConfiguration.cpp
 )
@@ -22,8 +23,18 @@ add_executable(micronTest
 	SeaNet.cpp
 	Micron.cpp
 	SonarScan.cpp
+	Profiling.cpp
 	MicronConfiguration.cpp
 	main.cpp
+)
+
+add_executable(profilingTest
+	SeaNet.cpp
+	Micron.cpp
+	SonarScan.cpp
+	Profiling.cpp
+	MicronConfiguration.cpp
+	main-profiling.cpp
 )
 
 TARGET_LINK_LIBRARIES(micron
@@ -36,12 +47,17 @@ TARGET_LINK_LIBRARIES(micronTest
 	${Boost_LIBRARIES}
 )
 
+TARGET_LINK_LIBRARIES(profilingTest
+	${IO_LIBRARIES}
+	${Boost_LIBRARIES}
+)
+
 
 INSTALL(TARGETS micron 
 	LIBRARY DESTINATION lib
 )
 
-INSTALL(FILES SonarScan.h MicronConfiguration.h SeaNet.h Micron.h DESTINATION include)
+INSTALL(FILES SonarScan.h MicronConfiguration.h SeaNet.h Micron.h Profiling.h DESTINATION include)
 
 CONFIGURE_FILE(micron.pc.in micron.pc @ONLY)
 
