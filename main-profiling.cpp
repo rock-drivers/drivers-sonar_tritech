@@ -43,7 +43,7 @@ class Interface : public SeaNet::SonarHandler{
 
 
 int main(int argc, char* argv[]) {
-  SeaNet::Profiling si;
+  SeaNet::Profiling::Driver si;
   Interface i;
   si.init(std::string(argv[1]));
  /* 

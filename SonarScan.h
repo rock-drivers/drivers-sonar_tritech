@@ -15,6 +15,9 @@
 
 
 class SonarScan{
+public:
+	SonarScan(){};
+	virtual ~SonarScan(){};
 };
 
 class ProfilerScan: public SonarScan{
@@ -49,6 +52,7 @@ public:
     base::Time time;
 
 MicronScan();
+~MicronScan(){};
 
 MicronScan(MicronScan const& other);
 

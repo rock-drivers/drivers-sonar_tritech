@@ -8,19 +8,21 @@
 #ifndef _PROFILING_H_
 #define _PROFILING_H_ 
 
+#ifndef __orogen
 #include "SonarScan.h"
 #include "SeaNet.h"
 #include <list>
 #include <iodrivers_base.hh>
 #include <base/time.h>
+#endif
 
 typedef uint16_t u16;
 typedef uint8_t  u8;
 typedef uint32_t u32;
 
-namespace SeaNet{
+namespace SeaNet{ namespace Profiling{
 
-
+#ifndef __orogen
 enum HeadControl{
 	ADAPTIVE_GAIN = 1,
 	PRF_ALT = 2,
@@ -39,10 +41,11 @@ enum HeadControl{
 	PRF_MIRROR = 16384,
 	IGNORESENSOR = 32768
 };
+#endif
 
 struct headControl{
 	u8 V3BParams;
-	u16 headControl;
+	u16 headCtl;
 	u8 headType;
 	u32 txnch1;
 	u32 txnch2;
@@ -80,20 +83,26 @@ struct headControl{
 	u16 slope_Ch2;
 	u16 slopeDelayCh1;
 	u16 slopeDelayCh2;
-} __attribute__ ((packed)) __attribute__((__may_alias__));
+#ifdef __orogen
+};
+#else
+}  __attribute__ ((packed)) __attribute__((__may_alias__)); 
+#endif
 
-class Profiling : public Protocol 
+
+#ifndef __orogen
+class Driver: public Protocol 
 {
 public:
-	Profiling();
-	~Profiling();
-	headControl getDefaultHeadData();
+	Driver();
+	~Driver();
+	static headControl getDefaultHeadData();
 	void sendHeadData(headControl hc);
 	void processHeadData(u8 *message);
 
 };
+#endif
 
-
-};
+};};
 
 #endif

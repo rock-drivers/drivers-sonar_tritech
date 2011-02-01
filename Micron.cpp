@@ -12,17 +12,17 @@
 
 #define WRITETIMEOUT 200
 
-namespace SeaNet{
+namespace SeaNet{ namespace Micron{
 
-Micron::Micron(): Protocol(0x02,0xFF){ //Reciving node 0x02 means micron
+Driver::Driver(): Protocol(0x02,0xFF){ //Reciving node 0x02 means micron
     headDataChanged=false;
 }
 
-Micron::~Micron() {
+Driver::~Driver() {
 }
 
 
-void Micron::processHeadData(u8 *message){
+void Driver::processHeadData(u8 *message){
 	base::Time timestamp = base::Time::now();
 	uint8_t nodeType = message[12];
 	//uint8_t type = message[10];
@@ -59,13 +59,13 @@ void Micron::processHeadData(u8 *message){
 
 
 
-void Micron::sendHeadData(headControl hc){
+void Driver::sendHeadData(headControl hc){
 	//TODO
 	memcpy(headData,&hc,sizeof(hc));
 	headDataChanged=true;
 }
 
-headControl Micron::getDefaultHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,
+headControl Driver::getDefaultHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,
 		bool pingpong,uint16_t rangeScale, uint16_t leftLimit, uint16_t rightLimit, uint8_t adSpan, 
 		uint8_t adLow, uint8_t initialGain, uint8_t motorStepDelayTime, uint8_t motorStepAngleSize,
 		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint){
@@ -158,7 +158,7 @@ headControl Micron::getDefaultHeadData(bool adc8on,bool cont,bool scanright,bool
 }
 
 
-void Micron::sendHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,
+void Driver::sendHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,
 		bool pingpong,uint16_t rangeScale, uint16_t leftLimit, uint16_t rightLimit, uint8_t adSpan, 
 		uint8_t adLow, uint8_t initialGain, uint8_t motorStepDelayTime, uint8_t motorStepAngleSize,
 		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint) {
@@ -167,5 +167,5 @@ void Micron::sendHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool 
 	sendHeadData(hc);	
 }
 
-};
+};};
 

@@ -13,18 +13,18 @@
 #define WRITETIMEOUT 200
 
 
-namespace SeaNet{
+namespace SeaNet{ namespace Profiling{
 
-Profiling::Profiling(): Protocol(0x14,0xFF) //0x14 means Profiling Sonar
+Driver::Driver(): Protocol(0x14,0xFF) //0x14 means Driver Sonar
 {
     headDataChanged=false;
 }
 
-Profiling::~Profiling() {
+Driver::~Driver() {
 }
 
 
-void Profiling::processHeadData(u8 *message){
+void Driver::processHeadData(u8 *message){
         base::Time timestamp = base::Time::now();
         uint8_t nodeType = message[12];
         //uint8_t type = message[10];
@@ -67,10 +67,10 @@ void Profiling::processHeadData(u8 *message){
 	}
 }
 
-headControl Profiling::getDefaultHeadData(){
+headControl Driver::getDefaultHeadData(){
 	headControl hc;
 	hc.V3BParams = 0x1D;
-	hc.headControl = 8964;
+	hc.headCtl = 8964;
 	hc.headType = 5;
 	hc.txnch1 = 77846282;
 	hc.txnch2 = 162403450;
@@ -112,10 +112,10 @@ headControl Profiling::getDefaultHeadData(){
 
 }
    
-void Profiling::sendHeadData(headControl hc){
+void Driver::sendHeadData(headControl hc){
 	memcpy(headData,&hc,sizeof(hc));	
 	headDataChanged=true;	
 }
 
-};
+};};
 

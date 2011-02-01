@@ -123,7 +123,6 @@ double MicronScan::getScale() const
   return  (((scanData.size()*adInterval*640.0)/1000000000.0)*1500.0/2.0)/scanData.size();
 }
 
-/*
 std::ostream& operator<<(std::ostream &stream, const MicronScan& scan){ 
   stream << scan.packedSize;
   stream << scan.deviceType;
@@ -147,8 +146,7 @@ std::ostream& operator<<(std::ostream &stream, const MicronScan& scan){
   	stream << scan.scanData[i];	
   return stream;
 }
-*/
-/*
+
 std::istream& operator>>(std::istream& stream, MicronScan& scan){
   //stream >> scan.packedSize;
   //stream >> scan.deviceType;
@@ -176,4 +174,3 @@ std::istream& operator>>(std::istream& stream, MicronScan& scan){
   return stream;
 }
 
-*/
