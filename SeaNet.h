@@ -127,7 +127,7 @@ protected:
 	std::list<SonarHandler*> handlers;
 	void sendPacked(MsgType type,uint8_t *data);
 	void processMessage(uint8_t *message);
-	//int timeCnt;
+	int timeCnt;
 	const uint8_t rxNode;
 	const uint8_t txNode;
 	//int fileCnt;

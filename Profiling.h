@@ -70,7 +70,7 @@ struct headControl{
 	u16 minorAxisDir;
 	u8 majorAxisPan;
 	u8 ctl2;
-	u8 scanZ;
+	u16 scanZ;
 	u8 adThrCh1;
 	u8 adThrCh2;
 	u8 filterGainCh1;

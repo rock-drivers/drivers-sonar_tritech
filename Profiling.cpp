@@ -77,7 +77,7 @@ headControl Driver::getDefaultHeadData(){
 	hc.rxnch1 = 138915348;
 	hc.rxnch2 = 223472517;
 	hc.txPulseLength=30;
-	hc.rangeScale = 2;
+	hc.rangeScale = 20;
 	hc.leftLimit = 2134;
 	hc.rightLimit = 4266;
 	hc.adThreashold = 50;

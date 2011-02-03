@@ -20,7 +20,7 @@ class Interface : public SeaNet::SonarHandler{
 	}
 */
 	void processSonarScan(SonarScan const *scan){
-		printf("Hot something in callbacl\n");
+		printf("Got Scan!\n");
 		/*
 		const MicronScan *micron = dynamic_cast<const MicronScan*>(scan);
 		printf("Got Scan\n");
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
     si.requestData();
     while(1){
       try {
-	si.processSerialData(1000);
+	si.processSerialData(2000);
         si.requestData();
       }catch(timeout_error t) {
 	printf("Timeout\n");

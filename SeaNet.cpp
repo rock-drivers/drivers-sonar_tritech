@@ -21,6 +21,7 @@ Protocol::Protocol(uint8_t rxNode, uint8_t txNode):
 {
     headDataChanged=false;
     initialized=false;
+    timeCnt=0;
 }
 
 Protocol::~Protocol() {
@@ -129,7 +130,7 @@ void Protocol::sendPacked(MsgType type, uint8_t *data) {
         msg[10] = mtSendData;
         msg[11] = 0x80;
         msg[12] = rxNode;
-        uint32_t time = 134145; //TODO zeit ausm system holen
+        uint32_t time = timeCnt++; //TODO zeit ausm system holen
         memcpy(msg+13,&time,4);
         msg[17]=0x0A;
         break;
@@ -148,11 +149,11 @@ void Protocol::sendPacked(MsgType type, uint8_t *data) {
         fprintf(stderr,"Couldn't send Packet\n");
     } else {
         
-	//fprintf(stdout,"Sended packet with length: %i\n",(length+6));
-        //for (int i=0;i< length+6;i++) {
-        //    fprintf(stdout,"%02X ",msg[i]);
-        //}
-        //fprintf(stdout,"\n");
+//	fprintf(stdout,"Sended packet with length: %i\n",(length+6));
+//        for (int i=0;i< length+6;i++) {
+//            fprintf(stdout,"%02X ",msg[i]);
+//        }
+//        fprintf(stdout,"\n");
 	
     }
 
