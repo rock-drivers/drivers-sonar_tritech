@@ -83,6 +83,52 @@ struct headControl{
 	u16 slope_Ch2;
 	u16 slopeDelayCh1;
 	u16 slopeDelayCh2;
+#ifndef __orogen
+	bool operator!=(const headControl &other) const{
+		return !(
+		other.V3BParams		== V3BParams&&
+		other.headCtl		== headCtl&&
+		other.headType		== headType&&
+		other.txnch1		== txnch1&&
+		other.txnch2		== txnch2&&
+		other.rxnch1		== rxnch1&&
+		other.rxnch2		== rxnch2&&
+		other.txPulseLength	== txPulseLength&&
+		other.rangeScale	== rangeScale&&
+		other.leftLimit		== leftLimit&&
+		other.rightLimit	== rightLimit&&
+		other.adThreashold	== adThreashold&&
+		other.filterGain	== filterGain&&		
+		other.maxAge		== maxAge &&	
+		other.setPoint		== setPoint&&		
+		other.slopeCh1		== slopeCh1&&
+		other.slopeCh2		== slopeCh2&&
+		other.motorTime		== motorTime&&		
+		other.stepSize		== stepSize&&
+		other.scanTime		== scanTime&&
+		other.PrfSpl		== PrfSpl&&
+		other.PrfCtl2		== PrfCtl2&&
+		other.lockout		== lockout&&
+		other.minorAxisDir	== minorAxisDir&&
+		other.majorAxisPan	== majorAxisPan&&
+		other.ctl2		== ctl2&&
+		other.scanZ		== scanZ&&
+		other.adThrCh1		== adThrCh1&&
+		other.adThrCh2		== adThrCh2&&
+		other.filterGainCh1	== filterGainCh1&&
+		other.filterGainCh2	== filterGainCh2&&
+		other.maxAgeCh1		== maxAgeCh1&&
+		other.maxAgeCh2		== maxAgeCh2&&
+		other.setPointCh1	== setPointCh1&&
+		other.setPointCh2	== setPointCh2&&
+		other.slope_Ch1		== slope_Ch1&&
+		other.slope_Ch2		== slope_Ch2&&
+		other.slopeDelayCh1	== slopeDelayCh1&&
+		other.slopeDelayCh2	== slopeDelayCh2
+		);
+	}
+#endif
+
 #ifdef __orogen
 };
 #else
