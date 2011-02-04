@@ -10,7 +10,7 @@
 #include <string.h>
 #include <boost/thread/thread.hpp>
 
-#define WRITETIMEOUT 200
+#define WRITETIMEOUT 400
 
 namespace SeaNet{
 
@@ -149,11 +149,11 @@ void Protocol::sendPacked(MsgType type, uint8_t *data) {
         fprintf(stderr,"Couldn't send Packet\n");
     } else {
         
-//	fprintf(stdout,"Sended packet with length: %i\n",(length+6));
-//        for (int i=0;i< length+6;i++) {
-//            fprintf(stdout,"%02X ",msg[i]);
-//        }
-//        fprintf(stdout,"\n");
+	fprintf(stdout,"Sended packet with length: %i\n",(length+6));
+        for (int i=0;i< length+6;i++) {
+            fprintf(stdout,"%02X ",msg[i]);
+        }
+        fprintf(stdout,"\n");
 	
     }
 

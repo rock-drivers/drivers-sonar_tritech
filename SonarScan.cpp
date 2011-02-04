@@ -115,7 +115,7 @@ rightLimit(rightLimit),
 stepSize(stepSize),
 scanTime(scanTime){
 	this->scanData.resize(dataSize);
-	memcpy(&this->scanData[0],data,dataSize);
+	memcpy(&this->scanData[0],data,sizeof(this->scanData[0])*dataSize);
 }
 
 double MicronScan::getScale() const

@@ -19,26 +19,14 @@ class Interface : public SeaNet::SonarHandler{
 		printf("Got Ground distance: %f\n",depth);
 	}
 */
-	void processSonarScan(SonarScan const *scan){
-		printf("Got Scan!\n");
-		/*
-		const MicronScan *micron = dynamic_cast<const MicronScan*>(scan);
-		printf("Got Scan\n");
-		for(unsigned int i=0;i<micron.scanData.size();i++){
-			printf("%hu ",micron.scanData[i]);
+	void processSonarScan(SonarScan const *s){
+		const ProfilerScan *scan = dynamic_cast<const ProfilerScan*>(s);
+		for(unsigned int i=0;i<scan->scanData.size();i++){
+			printf("%f ",scan->scanData[i]*10e-6*1500.0/2.0);
 		}
 		printf("\n");
-		*/
 	};
-/*	
-	virtual void processSonarScan(ProfilerScan const& scan){
-		printf("Got Profiler Scan\n");
-		for(unsigned int i=0;i<scan.scanData.size();i++){
-			printf("%f ",scan.scanData[i]*10e-6*1500.0/2.0);
-		}
-		printf("\n");
-	}
-*/
+	
 };
 
 

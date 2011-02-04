@@ -129,11 +129,11 @@ struct headControl{
 	}
 #endif
 
-#ifdef __orogen
-};
-#else
+//#ifdef __orogen
+//};
+//#else
 }  __attribute__ ((packed)) __attribute__((__may_alias__)); 
-#endif
+//#endif
 
 
 #ifndef __orogen

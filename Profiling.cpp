@@ -31,6 +31,7 @@ void Driver::processHeadData(u8 *message){
         uint16_t packedSize    = message[13] | (message[14]<<8);
         uint8_t deviceType     = message[15];
 	if(nodeType== 0x14){
+		printf("got length or multitype: %i\n",message[9]);
 		uint8_t headStatus     	= message[16];
 		uint8_t sweep		= message[17];
 		uint16_t headControl   	= message[18] | (message[19]<<8);
@@ -42,6 +43,7 @@ void Driver::processHeadData(u8 *message){
 		uint8_t filterGain     	= message[30];
 		uint16_t leftLim        = message[31] | (message[32]<<8);
 		uint16_t rightLim       = message[33] | (message[34]<<8);
+			printf("Left Limit: %i, RightLimit: %i Headcontrol: %02x %02x\n",leftLim,rightLim,message[18],message[19]);
 		uint8_t  stepSize      	= message[35];
 		uint16_t scanTime       = message[36] | (message[37]<<8);
 		uint16_t noPings        = message[38] | (message[39]<<8);
@@ -58,7 +60,7 @@ void Driver::processHeadData(u8 *message){
 		}else{
 			uint16_t data[noPings];
 			for(int i=0;i<noPings;i++){
-				data[i] = message[40+(i*2)] | (message[41+(i*2)]<<8);
+				data[i] = scanData[(i*2)] | (scanData[(i*2)+1]<<8);
 			}
 			notifyPeers(ProfilerScan(range,txn,gain,leftLim,rightLim,stepSize,scanTime,noPings,data));
 		}	
@@ -70,7 +72,7 @@ void Driver::processHeadData(u8 *message){
 headControl Driver::getDefaultHeadData(){
 	headControl hc;
 	hc.V3BParams = 0x1D;
-	hc.headCtl = 8964;
+	hc.headCtl = 8964 +128; //HF chan2
 	hc.headType = 5;
 	hc.txnch1 = 77846282;
 	hc.txnch2 = 162403450;
@@ -78,8 +80,10 @@ headControl Driver::getDefaultHeadData(){
 	hc.rxnch2 = 223472517;
 	hc.txPulseLength=30;
 	hc.rangeScale = 20;
-	hc.leftLimit = 2134;
-	hc.rightLimit = 4266;
+	//hc.leftLimit = 2134;
+	//hc.rightLimit = 4266;
+	hc.leftLimit = 0;
+	hc.rightLimit = 6399;
 	hc.adThreashold = 50;
 	hc.filterGain = 1;	
 	hc.maxAge = 107;	
