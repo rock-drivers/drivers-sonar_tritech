@@ -46,7 +46,6 @@ void Driver::processHeadData(u8 *message){
 		uint16_t bearing       = message[40] | (message[41]<<8);
 		uint16_t dataBytes     = message[42] | (message[43]<<8);
 		uint8_t *scanData      = message+44;
-
 		MicronScan scan(packedSize,deviceType,headStatus,sweepCode,headControl,
 			range,txn,gain,slope,adSpawn,adLow,headingOffset,adInterval,
 			leftLimit,rightLimit,steps,bearing,dataBytes,scanData);
@@ -91,21 +90,30 @@ headControl Driver::getDefaultHeadData(bool adc8on,bool cont,bool scanright,bool
     hc.rxnCh1 = 0; //Ignored
     hc.rxnCh2 = 0; //Ignored
     hc.pulseLength = (0x28) | 0; //Ignored
+    hc.rangeScale  = rangeScale;
     //hc.rangeScale  = (0x3C) | 0; //6 Meter
+    hc.leftLimit   = leftLimit; //1
     //hc.leftLimit   = (0x01) | 0; //1
+    hc.rightLimit  = rightLimit;
     //hc.rightLimit  = (0xFF) | (0x18<<8);
+    hc.adSpan = adSpan;
     //hc.adSpan = 0x51;
     //hc.adLow = 0x8;
+    hc.adLow = adLow;
     //hc.initialGainCh1 = 0x90;//54;
     //hc.initialGainCh2 = 0x90;//54;
     hc.initialGainCh1 = initialGain;
     hc.initialGainCh2 = initialGain;
     hc.slopeCh1 = 0; //Ignored
     hc.slopeCh2 = 0; //Ignored
+    hc.motorStepDelayTime = motorStepDelayTime;
     //hc.motorStepDelayTime = 0x19;
+    hc.motorStepAngleSize = motorStepAngleSize;
     //hc.motorStepAngleSize = 0x10;
+    hc.adInterval = adInterval;
     //hc.adInterval = (0x8D) | (0<<8);
     //hc.numberOfBins = (0xFF) | (0<<8);
+    hc.numberOfBins = numberOfBins;
     hc.maxADBuff = (0xE8) | (3<<8);
     hc.lockoutTime = (0x97) | (0x03<<8);
     hc.minorAxisDir = (0x40) | (0x06<<8);

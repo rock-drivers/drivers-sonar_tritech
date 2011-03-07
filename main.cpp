@@ -20,15 +20,14 @@ class Interface : public SeaNet::SonarHandler{
 	}
 */
 	void processSonarScan(SonarScan const *scan){
-		printf("Hot something in callbacl\n");
-		/*
+		
 		const MicronScan *micron = dynamic_cast<const MicronScan*>(scan);
-		printf("Got Scan\n");
-		for(unsigned int i=0;i<micron.scanData.size();i++){
-			printf("%hu ",micron.scanData[i]);
+		printf("Got Scan with size: %i\n",micron->scanData.size());
+		for(unsigned int i=0;i<micron->scanData.size();i++){
+			printf("%hu ",micron->scanData[i]);
 		}
 		printf("\n");
-		*/
+		
 	};
 /*	
 	virtual void processSonarScan(ProfilerScan const& scan){
