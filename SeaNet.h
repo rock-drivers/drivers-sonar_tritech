@@ -23,8 +23,6 @@ typedef uint32_t u32;
 
 class SonarInterface;
 
-
-
 static int MsgLength[] = {
 	3, //mtNULL = 3,
 	3, //mtVersionData=3,
@@ -97,7 +95,7 @@ class Protocol : public IODriver
 
 public:
 
-	Protocol(const uint8_t rxNode, const uint8_t txNode);
+	Protocol(const uint8_t rxNode, const uint8_t txNode, bool createPTS=false);
 	~Protocol();
 	void requestVersion();
 
@@ -110,6 +108,7 @@ public:
 	bool init(std::string const &port, int speed=115200);
 	bool processSerialData(int timeout = 400);
 	void reboot();
+	const char *getSlavePTS();
 
         base::Time lastKeepAlive;
 	base::Time lastPackage;
@@ -130,7 +129,11 @@ protected:
 	int timeCnt;
 	const uint8_t rxNode;
 	const uint8_t txNode;
-	//int fileCnt;
+	const bool createPts;
+	int pts_fd;
+	char *pts_slave;
+
+//int fileCnt;
 	static const int MAX_PACKET_SIZE = 5000;
 	virtual int extractPacket(uint8_t const* buffer, size_t buffer_size) const;
 

@@ -140,7 +140,7 @@ struct headControl{
 class Driver: public Protocol 
 {
 public:
-	Driver();
+	Driver(bool usePTS=false);
 	~Driver();
 	static headControl getDefaultHeadData();
 	void sendHeadData(headControl hc);

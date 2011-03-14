@@ -14,7 +14,7 @@
 
 namespace SeaNet{ namespace Micron{
 
-Driver::Driver(): Protocol(0x02,0xFF){ //Reciving node 0x02 means micron
+Driver::Driver(bool usePTS): Protocol(0x02,0xFF,usePTS){ //Reciving node 0x02 means micron
     headDataChanged=false;
 }
 

@@ -9,15 +9,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <boost/thread/thread.hpp>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 #define WRITETIMEOUT 400
 
 namespace SeaNet{
 
-Protocol::Protocol(uint8_t rxNode, uint8_t txNode): 
+Protocol::Protocol(uint8_t rxNode, uint8_t txNode, bool createPts): 
   IODriver(MAX_PACKET_SIZE,false),
   rxNode(rxNode),
-  txNode(txNode)
+  txNode(txNode),
+  createPts(createPts),
+  pts_fd(0)
 {
     headDataChanged=false;
     initialized=false;
@@ -226,6 +232,18 @@ void Protocol::processMessage(uint8_t *message) {
     case mtAuxData:
 	{
 	uint16_t packedSize = message[13] | (message[14]<<8);
+	if(pts_fd){
+		int toWrite = packedSize;
+		while(toWrite > 0){
+			int written = write(pts_fd,message+18,toWrite);
+			if(written > 0){
+				toWrite-=written;
+			}else{
+				fprintf(stderr,"Cannot write to PTS\n\t%s\n",strerror(errno));
+				break;
+			}
+		}
+	}
 	float depth=0;
 	if(packedSize == 9 && message[18] == '.' && message[22] == 'm'){
 		depth+= ((message[15]-48)) * 100;
@@ -310,7 +328,24 @@ void Protocol::notifyPeers(SonarScan const &scan){
 }
 
 bool Protocol::init(std::string const &port, int speed){
+	if(createPts){
+		pts_fd = posix_openpt(O_RDWR | O_NOCTTY);	
+		if(pts_fd > 0){
+			pts_slave = ptsname(pts_fd);	
+			if(pts_slave < 0){
+				fprintf(stderr,"Cannot get Virtual Sub TTY for subdevice\n\t%s\n",strerror(errno));
+				return false;
+			}
+		}else{
+			fprintf(stderr,"Cannot create Virtual TTY:\n\t%s\n",strerror(errno));
+			return false;
+		}
+	}
 	return openSerial(port,speed);
+}
+
+const char *Protocol::getSlavePTS(){
+	return pts_slave;
 }
 
 int Protocol::extractPacket(uint8_t const* buffer, size_t buffer_size) const{

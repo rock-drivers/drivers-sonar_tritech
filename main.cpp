@@ -42,9 +42,11 @@ class Interface : public SeaNet::SonarHandler{
 
 
 int main(int argc, char* argv[]) {
-  SeaNet::Micron::Driver si;
+  SeaNet::Micron::Driver si(true);
   Interface i;
   si.init(std::string(argv[1]));
+
+  printf("Sub PTS Name is: %s\n",si.getSlavePTS());
  /* 
   if(argc == 4){
       llpc.setLEDs(atoi(argv[2]));
