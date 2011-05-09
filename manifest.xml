@@ -9,5 +9,7 @@
     <cpp cflags="" lflags="" />
   </export>
   <depend package="drivers/iodrivers_base" />
+  <depend package="base/types" />
+  <depend package="drivers/micron" />
 </package>
 
