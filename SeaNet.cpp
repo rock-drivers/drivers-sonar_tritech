@@ -154,12 +154,13 @@ void Protocol::sendPacked(MsgType type, uint8_t *data) {
     if (!written) {
         fprintf(stderr,"Couldn't send Packet\n");
     } else {
-        
+        /*
 	fprintf(stdout,"Sended packet with length: %i\n",(length+6));
         for (int i=0;i< length+6;i++) {
             fprintf(stdout,"%02X ",msg[i]);
         }
         fprintf(stdout,"\n");
+	*/
 	
     }
 

@@ -105,7 +105,7 @@ public:
 	
 	void registerHandler(SonarHandler*);
 	void unregisterHandler(SonarHandler*);
-	bool init(std::string const &port, int speed=115200);
+	virtual bool init(std::string const &port, int speed=115200);
 	bool processSerialData(int timeout = 400);
 	void reboot();
 	const char *getSlavePTS();

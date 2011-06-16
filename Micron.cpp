@@ -165,6 +165,12 @@ headControl Driver::getDefaultHeadData(bool adc8on,bool cont,bool scanright,bool
 	return hc;
 }
 
+bool Driver::init(std::string const &port, int speed){
+	if(!Protocol::init(port,speed)){
+		return false;
+	}
+	sendHeadData(); //First Send full scan command to calib sonar
+}
 
 void Driver::sendHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,
 		bool pingpong,uint16_t rangeScale, uint16_t leftLimit, uint16_t rightLimit, uint8_t adSpan, 
