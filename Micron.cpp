@@ -170,6 +170,7 @@ bool Driver::init(std::string const &port, int speed){
 		return false;
 	}
 	sendHeadData(); //First Send full scan command to calib sonar
+	return true;
 }
 
 void Driver::sendHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,
