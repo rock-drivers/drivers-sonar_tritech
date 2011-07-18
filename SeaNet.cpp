@@ -156,12 +156,15 @@ void Protocol::sendPacked(MsgType type, uint8_t *data) {
     } else {
         /*
 	fprintf(stdout,"Sended packet with length: %i\n",(length+6));
+=======
+        
+	/*fprintf(stdout,"Sended packet with length: %i\n",(length+6));
+>>>>>>> Stashed changes
         for (int i=0;i< length+6;i++) {
             fprintf(stdout,"%02X ",msg[i]);
         }
         fprintf(stdout,"\n");
 	*/
-	
     }
 
 }
