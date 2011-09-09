@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include <unistd.h>
 
 #define WRITETIMEOUT 400
 
@@ -237,31 +237,15 @@ void Protocol::processMessage(uint8_t *message) {
 	{
 	uint16_t packedSize = message[13] | (message[14]<<8);
 	if(pts_fd){
-		int toWrite = packedSize;
+		int toWrite = packedSize+1;
 		while(toWrite > 0){
-			int written = write(pts_fd,message+18,toWrite);
+			int written = write(pts_fd,message+15,toWrite);
 			if(written > 0){
 				toWrite-=written;
 			}else{
 				fprintf(stderr,"Cannot write to PTS\n\t%s\n",strerror(errno));
 				break;
 			}
-		}
-	}
-	float depth=0;
-	if(packedSize == 9 && message[18] == '.' && message[22] == 'm'){
-		depth+= ((message[15]-48)) * 100;
-		depth+= ((message[16]-48)) * 10;
-		depth+= ((message[17]-48));
-		depth+= ((message[19]-48))/10.0;
-		depth+= ((message[20]-48))/100.0;
-		depth+= ((message[21]-48))/1000.0;
-		//notifyPeers(timestamp, depth);   
-		//TODO Do something with depth readings 
-	}else{
-		fprintf(stderr,"Cannot HAndle Unknown-AUX port data %s:%s",__FUNCTION__,__FILE__);
-		for(int i=10;i<packedSize;i++){
-			fprintf(stdout,"%c ",message[i]);
 		}
 	}
 	break;
@@ -340,6 +324,15 @@ bool Protocol::init(std::string const &port, int speed){
 				fprintf(stderr,"Cannot get Virtual Sub TTY for subdevice\n\t%s\n",strerror(errno));
 				return false;
 			}
+                        if (grantpt(pts_fd) < 0){
+                            ::close(pts_fd);
+                            return false;
+                        }
+                        if (unlockpt(pts_fd) < 0){
+                            ::close(pts_fd);
+                            return false;
+                        }
+
 		}else{
 			fprintf(stderr,"Cannot create Virtual TTY:\n\t%s\n",strerror(errno));
 			return false;
