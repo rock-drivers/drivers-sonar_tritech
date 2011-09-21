@@ -14,12 +14,8 @@ class Interface : public SeaNet::SonarHandler{
 	public:
 	Interface(){
 	}
-/*
-	void processDepth(base::Time const& time, double depth){
-		printf("Got Ground distance: %f\n",depth);
-	}
-*/
-	void processSonarScan(SonarScan const *scan){
+	
+        void processSonarScan(SonarScan const *scan){
 		
 		const MicronScan *micron = dynamic_cast<const MicronScan*>(scan);
 		printf("Got Scan with size: %i\n",micron->scanData.size());
@@ -29,15 +25,6 @@ class Interface : public SeaNet::SonarHandler{
 		printf("\n");
 		
 	};
-/*	
-	virtual void processSonarScan(ProfilerScan const& scan){
-		printf("Got Profiler Scan\n");
-		for(unsigned int i=0;i<scan.scanData.size();i++){
-			printf("%f ",scan.scanData[i]*10e-6*1500.0/2.0);
-		}
-		printf("\n");
-	}
-*/
 };
 
 
@@ -47,16 +34,7 @@ int main(int argc, char* argv[]) {
   si.init(std::string(argv[1]));
 
   printf("Sub PTS Name is: %s\n",si.getSlavePTS());
- /* 
-  if(argc == 4){
-      llpc.setLEDs(atoi(argv[2]));
-    if(argv[3][0] == '1'){
-      llpc.setLaserOverride(true);
-    }else{
-      llpc.setLaserOverride(false);
-    }
-  }else{
-  */
+  
   si.registerHandler(&i);
   si.sendHeadData(); 
     si.requestData();

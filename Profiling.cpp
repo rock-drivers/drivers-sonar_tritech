@@ -15,7 +15,7 @@
 
 namespace SeaNet{ namespace Profiling{
 
-Driver::Driver(bool usePTS): Protocol(0x14,0xFF,usePTS) //0x14 means Driver Sonar
+Driver::Driver(bool usePTS): Protocol(0x14,0xFF,usePTS) //0x14 means Driver Profiling
 {
     headDataChanged=false;
 }
@@ -27,29 +27,20 @@ Driver::~Driver() {
 void Driver::processHeadData(u8 *message){
         base::Time timestamp = base::Time::now();
         uint8_t nodeType = message[12];
-        //uint8_t type = message[10];
         uint16_t packedSize    = message[13] | (message[14]<<8);
-        //uint8_t deviceType     = message[15];
-	if(nodeType== 0x14){
-		printf("got length or multitype: %i\n",message[9]);
-		//uint8_t headStatus     	= message[16];
-		//uint8_t sweep		= message[17];
-		//uint16_t headControl   	= message[18] | (message[19]<<8);
+	if(nodeType==rxNode){
 		uint16_t range		= message[20] | (message[21]<<8);
 		uint32_t txn           	= message[22] | (message[23]<<8) | (message[24]<<16) | (message[25]<<24);
 		uint8_t gain           	= message[26];
-		//uint16_t slope          = message[27] | (message[28]<<8);
-		//uint8_t adThrs         	= message[29];
-		//uint8_t filterGain     	= message[30];
 		uint16_t leftLim        = message[31] | (message[32]<<8);
 		uint16_t rightLim       = message[33] | (message[34]<<8);
-			printf("Left Limit: %i, RightLimit: %i Headcontrol: %02x %02x\n",leftLim,rightLim,message[18],message[19]);
 		uint8_t  stepSize      	= message[35];
 		uint16_t scanTime       = message[36] | (message[37]<<8);
 		uint16_t noPings        = message[38] | (message[39]<<8);
 		uint8_t *scanData	= message+40;
 		uint16_t dataEnd = 40+(noPings*2);
-		if(message[dataEnd+10] != 0x0A){	
+		if(message[dataEnd+10] != PACKED_END){
+#if 0 //debug
 			printf("Bla Kaputt: %c\n",message[0]);
 			for(int i=dataEnd-2;i<dataEnd+20;i++){
 				printf(" %02x",message[i]);
@@ -57,6 +48,7 @@ void Driver::processHeadData(u8 *message){
 			printf("\n");
 			printf("No of Pings: %i, len %i\n",noPings,packedSize);
 			fprintf(stderr,"Cannot Parse Head message\n");
+#endif
 		}else{
 			uint16_t data[noPings];
 			for(int i=0;i<noPings;i++){
@@ -72,7 +64,7 @@ void Driver::processHeadData(u8 *message){
 headControl Driver::getDefaultHeadData(){
 	headControl hc;
 	hc.V3BParams = 0x1D;
-	hc.headCtl = 8964 +128; //HF chan2
+	hc.headCtl = 8964 +128;
 	hc.headType = 5;
 	hc.txnch1 = 77846282;
 	hc.txnch2 = 162403450;
@@ -80,8 +72,6 @@ headControl Driver::getDefaultHeadData(){
 	hc.rxnch2 = 223472517;
 	hc.txPulseLength=30;
 	hc.rangeScale = 20;
-	//hc.leftLimit = 2134;
-	//hc.rightLimit = 4266;
 	hc.leftLimit = 0;
 	hc.rightLimit = 6399;
 	hc.adThreashold = 50;

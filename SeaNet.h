@@ -23,6 +23,11 @@ typedef uint32_t u32;
 
 class SonarInterface;
 
+
+/**
+ * Length definition of packages
+ * 0 menas (most time) not implemented yet
+ */
 static int MsgLength[] = {
 	3, //mtNULL = 3,
 	3, //mtVersionData=3,
@@ -84,45 +89,73 @@ enum MsgType{
 };
 
 
+/**
+ * Classes which would use the sonar scans must be implement this handler and check
+ * by an cast which type of sonarScan is arrived
+ */
 class SonarHandler{
 public:
 	virtual void processSonarScan(const SonarScan *scan)=0;
 };
 
 
+/**
+ * Each Tritech (aka SeaNet Protocoll) device can derivate from this class und setting
+ * the head data and must be implement an handler for head data
+ * the whole protocoll handling is done by this class
+ */
 class Protocol : public IODriver
 {
 
 public:
-
+        /**
+         * rxNode, txNode Node identifier, unique for each device-class
+         * createPTS, should be  subdevice created for aux-data?
+         */
 	Protocol(const uint8_t rxNode, const uint8_t txNode, bool createPTS=false);
 	~Protocol();
+
+        /**
+         * Requesting Firmware version of device
+         */
 	void requestVersion();
 
-///	virtual void sendHeadData()=0;
+        /**
+         * virtual function that processes the incomming message from the sonars
+         */
 	virtual void processHeadData(u8 *message)=0;
+
+        /**
+         * Requesting next scan
+         */
 	void requestData();
 	
-	void registerHandler(SonarHandler*);
+        /**
+         * Handler based mode, register an new subscriber
+         */
+        void registerHandler(SonarHandler*);
 	void unregisterHandler(SonarHandler*);
+
+        /**
+         * Initializaes the port
+         */
 	virtual bool init(std::string const &port, int speed=115200);
 	bool processSerialData(int timeout = 400);
 	void reboot();
+
+        /**
+         * Gets the uni file corresponding to the creates psydo tty
+         */
 	const char *getSlavePTS();
 
         base::Time lastKeepAlive;
 	base::Time lastPackage;
 
 protected:
+        static const char PACKED_END = 0x0A;
 	bool initialized;
-	//int waitCounter;
-/*
-	void notifyPeers(base::Time const& time, float depth);
-	void notifyPeers(SonarScan const& scan);
-	void notifyPeers(ProfilerScan const& scan);
-	uint8_t scanData[6369*256];	
-*/
-	void notifyPeers(SonarScan const &scan);
+	
+        void notifyPeers(SonarScan const &scan);
 	std::list<SonarHandler*> handlers;
 	void sendPacked(MsgType type,uint8_t *data);
 	void processMessage(uint8_t *message);
@@ -133,7 +166,6 @@ protected:
 	int pts_fd;
 	char *pts_slave;
 
-//int fileCnt;
 	static const int MAX_PACKET_SIZE = 5000;
 	virtual int extractPacket(uint8_t const* buffer, size_t buffer_size) const;
 

@@ -128,12 +128,7 @@ struct headControl{
 		);
 	}
 #endif
-
-//#ifdef __orogen
-//};
-//#else
 }  __attribute__ ((packed)) __attribute__((__may_alias__)); 
-//#endif
 
 
 #ifndef __orogen
@@ -145,7 +140,6 @@ public:
 	static headControl getDefaultHeadData();
 	void sendHeadData(headControl hc);
 	void processHeadData(u8 *message);
-
 };
 #endif
 
