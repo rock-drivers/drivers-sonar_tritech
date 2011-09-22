@@ -18,11 +18,16 @@ class Interface : public SeaNet::SonarHandler{
         void processSonarScan(SonarScan const *scan){
 		
 		const MicronScan *micron = dynamic_cast<const MicronScan*>(scan);
-		printf("Got Scan with size: %i\n",micron->scanData.size());
-		for(unsigned int i=0;i<micron->scanData.size();i++){
-			printf("%hu ",micron->scanData[i]);
-		}
-		printf("\n");
+		const GroundDistance *gd = dynamic_cast<const GroundDistance*>(scan);
+                if(micron){
+                    printf("Got Scan with size: %i\n",micron->scanData.size());
+                    for(unsigned int i=0;i<micron->scanData.size();i++){
+                            printf("%hu ",micron->scanData[i]);
+                    }
+                    printf("\n");
+                }else if(gd){
+                    printf("Ground distance: %f\n",gd->distance);
+                }
 		
 	};
 };

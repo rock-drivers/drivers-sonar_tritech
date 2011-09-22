@@ -20,6 +20,12 @@ public:
 	virtual ~SonarScan(){};
 };
 
+class GroundDistance : public SonarScan{
+    public:
+        base::Time time;
+        double distance;
+};
+
 class ProfilerScan: public SonarScan{
 public:
 	base::Time time;

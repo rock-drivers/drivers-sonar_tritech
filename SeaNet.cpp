@@ -242,6 +242,23 @@ void Protocol::processMessage(uint8_t *message) {
 			}
 		}
 	}
+        if(message[15+packedSize-1] == 0x0d){ //end of depth message 
+            char tmp[packedSize];
+            memcpy(tmp,message+15,packedSize);
+            tmp[packedSize-1] = '\0'; //make sure string ends correctly
+            int depth = 0;
+            if(sscanf(tmp,"%dmm",&depth) == 1){ //Parsed like 14mm packge
+                double reading = (float)depth/1000.0;
+                GroundDistance gd;
+                gd.time = base::Time::now();
+                gd.distance = reading;
+                notifyPeers(gd);
+                //printf("Current Depth is: %f\n",reading);
+            }
+        }
+
+        printf("\n");
+
 	break;
 	}
     case mtAdcData:
