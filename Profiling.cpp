@@ -29,6 +29,8 @@ void Driver::processHeadData(u8 *message){
         uint8_t nodeType = message[12];
         uint16_t packedSize    = message[13] | (message[14]<<8);
 	if(nodeType==rxNode){
+		uint8_t  sweep_code      = message[17];
+		uint16_t hd_Ctrl        = message[18] | (message[19]<<8);
 		uint16_t range		= message[20] | (message[21]<<8);
 		uint32_t txn           	= message[22] | (message[23]<<8) | (message[24]<<16) | (message[25]<<24);
 		uint8_t gain           	= message[26];
@@ -54,7 +56,7 @@ void Driver::processHeadData(u8 *message){
 			for(int i=0;i<noPings;i++){
 				data[i] = scanData[(i*2)] | (scanData[(i*2)+1]<<8);
 			}
-			notifyPeers(ProfilerScan(range,txn,gain,leftLim,rightLim,stepSize,scanTime,noPings,data));
+			notifyPeers(ProfilerScan(sweep_code,hd_Ctrl,range,txn,gain,leftLim,rightLim,stepSize,scanTime,noPings,data));
 		}	
 	}else{
 		fprintf(stderr,"Unknown Device\n");
@@ -64,7 +66,7 @@ void Driver::processHeadData(u8 *message){
 headControl Driver::getDefaultHeadData(){
 	headControl hc;
 	hc.V3BParams = 0x1D;
-	hc.headCtl = 8964 +128;
+	hc.headCtl = PRF_ALT | CHAN2 |  PRF_FIRST | HASMOT | PRF_MASTER ;
 	hc.headType = 5;
 	hc.txnch1 = 77846282;
 	hc.txnch2 = 162403450;
