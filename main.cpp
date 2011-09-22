@@ -41,8 +41,11 @@ int main(int argc, char* argv[]) {
   printf("Sub PTS Name is: %s\n",si.getSlavePTS());
   
   si.registerHandler(&i);
-  si.sendHeadData(); 
-    si.requestData();
+  
+  SeaNet::Micron::headControl hc = si.getDefaultHeadData();
+  hc.numberOfBins = 600;
+  si.sendHeadData(hc); 
+  si.requestData();
     while(1){
       try {
 	si.processSerialData(1000);

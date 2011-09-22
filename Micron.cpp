@@ -178,7 +178,7 @@ void Driver::sendHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool 
 		uint8_t adLow, uint8_t initialGain, uint8_t motorStepDelayTime, uint8_t motorStepAngleSize,
 		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint) {
 
-	headControl hc = getDefaultHeadData(adc8on,cont,scanright,invert,chan2,applyoffset,pingpong,rangeScale,leftLimit,rightLimit,adSpan,adLow,initialGain,motorStepDelayTime,motorStepDelayTime,adInterval,numberOfBins,adcSetpoint); 
+	headControl hc = getDefaultHeadData(adc8on,cont,scanright,invert,chan2,applyoffset,pingpong,rangeScale,leftLimit,rightLimit,adSpan,adLow,initialGain,motorStepDelayTime,motorStepAngleSize,adInterval,numberOfBins,adcSetpoint); 
 	sendHeadData(hc);	
 }
 
