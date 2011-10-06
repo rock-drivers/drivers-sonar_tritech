@@ -216,6 +216,7 @@ void Protocol::processMessage(uint8_t *message) {
     case mtAlive:
         lastKeepAlive = timestamp;
 	requestData();
+	requestData();
         fprintf(stderr,"Got an Alive packet, Found Sonar, should not happten, rerequesting Data!\n");
         break;
     case mtPrgAck:

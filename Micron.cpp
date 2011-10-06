@@ -85,11 +85,11 @@ headControl Driver::getDefaultHeadData(bool adc8on,bool cont,bool scanright,bool
     bool replyThr = false;
     bool ignoreSensor = false;
     hc.headType = 0x02;
-    hc.txnCh1 = 0; //Ignored
-    hc.txnCh2 = 0; //Ignored
-    hc.rxnCh1 = 0; //Ignored
-    hc.rxnCh2 = 0; //Ignored
-    hc.pulseLength = (0x28) | 0; //Ignored
+    hc.txnCh1 = 77846282;
+    hc.txnCh2 = 162403450;
+    hc.rxnCh1 = 138915348;
+    hc.rxnCh2 = 223472517;
+    hc.pulseLength=30;
     hc.rangeScale  = rangeScale;
     //hc.rangeScale  = (0x3C) | 0; //6 Meter
     hc.leftLimit   = leftLimit; //1
