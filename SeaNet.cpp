@@ -19,7 +19,7 @@
 namespace SeaNet{
 
 Protocol::Protocol(uint8_t rxNode, uint8_t txNode, bool createPts): 
-  IODriver(MAX_PACKET_SIZE,false),
+  iodrivers_base::Driver(MAX_PACKET_SIZE,false),
   rxNode(rxNode),
   txNode(txNode),
   createPts(createPts),
@@ -173,7 +173,7 @@ bool Protocol::processSerialData(int timeout){
 		readPacket(packed,MAX_PACKET_SIZE,timeout,timeout);
 		processMessage(packed);
                 return true;
-      	}catch(timeout_error t) {
+      	}catch(iodrivers_base::TimeoutError t) {
 		printf("Timeout from readPacked\n");
 	}
         return false;

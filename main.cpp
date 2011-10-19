@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
       try {
 	si.processSerialData(1000);
         si.requestData();
-      }catch(timeout_error t) {
+      }catch(iodrivers_base::TimeoutError t) {
 	printf("Timeout\n");
       }
   }

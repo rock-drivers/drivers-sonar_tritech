@@ -11,7 +11,6 @@
 #include "SonarScan.h"
 #include "SeaNet.h" 
 #include <list>
-#include <iodrivers_base.hh>
 #include <base/time.h>
 
 namespace SeaNet{ namespace Micron{

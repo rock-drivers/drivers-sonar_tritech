@@ -10,7 +10,7 @@
 
 #include "SonarScan.h"
 #include <list>
-#include <iodrivers_base.hh>
+#include <iodrivers_base/Driver.hpp>
 #include <base/time.h>
 
 
@@ -104,7 +104,7 @@ public:
  * the head data and must be implement an handler for head data
  * the whole protocoll handling is done by this class
  */
-class Protocol : public IODriver
+class Protocol : public iodrivers_base::Driver 
 {
 
 public:
