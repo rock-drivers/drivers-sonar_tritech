@@ -85,11 +85,11 @@ headControl Driver::getDefaultHeadData(bool adc8on,bool cont,bool scanright,bool
     bool replyThr = false;
     bool ignoreSensor = false;
     hc.headType = 0x02;
-    hc.txnCh1 = 0; //Ignored
-    hc.txnCh2 = 0; //Ignored
-    hc.rxnCh1 = 0; //Ignored
-    hc.rxnCh2 = 0; //Ignored
-    hc.pulseLength = (0x28) | 0; //Ignored
+    hc.txnCh1 = 77846282;
+    hc.txnCh2 = 162403450;
+    hc.rxnCh1 = 138915348;
+    hc.rxnCh2 = 223472517;
+    hc.pulseLength=30;
     hc.rangeScale  = rangeScale;
     //hc.rangeScale  = (0x3C) | 0; //6 Meter
     hc.leftLimit   = leftLimit; //1
@@ -165,13 +165,20 @@ headControl Driver::getDefaultHeadData(bool adc8on,bool cont,bool scanright,bool
 	return hc;
 }
 
+bool Driver::init(std::string const &port, int speed){
+	if(!Protocol::init(port,speed)){
+		return false;
+	}
+	sendHeadData(); //First Send full scan command to calib sonar
+	return true;
+}
 
 void Driver::sendHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,
 		bool pingpong,uint16_t rangeScale, uint16_t leftLimit, uint16_t rightLimit, uint8_t adSpan, 
 		uint8_t adLow, uint8_t initialGain, uint8_t motorStepDelayTime, uint8_t motorStepAngleSize,
 		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint) {
 
-	headControl hc = getDefaultHeadData(adc8on,cont,scanright,invert,chan2,applyoffset,pingpong,rangeScale,leftLimit,rightLimit,adSpan,adLow,initialGain,motorStepDelayTime,motorStepDelayTime,adInterval,numberOfBins,adcSetpoint); 
+	headControl hc = getDefaultHeadData(adc8on,cont,scanright,invert,chan2,applyoffset,pingpong,rangeScale,leftLimit,rightLimit,adSpan,adLow,initialGain,motorStepDelayTime,motorStepAngleSize,adInterval,numberOfBins,adcSetpoint); 
 	sendHeadData(hc);	
 }
 

@@ -97,7 +97,9 @@ MicronScan::MicronScan(
 
 
 ProfilerScan::ProfilerScan(
-	uint16_t range,
+	uint8_t  sweep_code,
+        uint16_t hd_Ctrl,
+        uint16_t range,
 	uint32_t TxN,
 	uint8_t gain,
 	uint16_t leftLimit,
@@ -107,6 +109,8 @@ ProfilerScan::ProfilerScan(
 	uint16_t dataSize,
 	uint16_t *data
 ):
+sweep_code(sweep_code),
+hd_Ctrl(hd_Ctrl),
 range(range),
 TxN(TxN),
 gain(gain),

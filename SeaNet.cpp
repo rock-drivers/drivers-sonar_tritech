@@ -12,14 +12,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
+#include <unistd.h>
 
 #define WRITETIMEOUT 400
 
 namespace SeaNet{
 
 Protocol::Protocol(uint8_t rxNode, uint8_t txNode, bool createPts): 
-  IODriver(MAX_PACKET_SIZE,false),
+  iodrivers_base::Driver(MAX_PACKET_SIZE,false),
   rxNode(rxNode),
   txNode(txNode),
   createPts(createPts),
@@ -109,7 +109,7 @@ void Protocol::sendPacked(MsgType type, uint8_t *data) {
         msg[11] = 0x80;
         msg[12] = rxNode;
         memcpy(msg+13,data,68);
-        msg[81] = 0x0A;
+        msg[81] = PACKED_END;
 	headDataChanged=false;
         break;
         /*
@@ -124,7 +124,7 @@ void Protocol::sendPacked(MsgType type, uint8_t *data) {
         msg[10] = mtSendVersion;
         msg[11] = 0x80;
         msg[12] = rxNode;
-        msg[13] = 0x0A;
+        msg[13] = PACKED_END;
         break;
     }
     /*
@@ -138,7 +138,7 @@ void Protocol::sendPacked(MsgType type, uint8_t *data) {
         msg[12] = rxNode;
         uint32_t time = timeCnt++; //TODO zeit ausm system holen
         memcpy(msg+13,&time,4);
-        msg[17]=0x0A;
+        msg[17]= PACKED_END;
         break;
     }
     /*case mtSendPreferenceData:
@@ -153,14 +153,14 @@ void Protocol::sendPacked(MsgType type, uint8_t *data) {
 
     if (!written) {
         fprintf(stderr,"Couldn't send Packet\n");
+#if 0 //Debug code
     } else {
-        
 	fprintf(stdout,"Sended packet with length: %i\n",(length+6));
         for (int i=0;i< length+6;i++) {
             fprintf(stdout,"%02X ",msg[i]);
         }
         fprintf(stdout,"\n");
-	
+#endif 
     }
 
 }
@@ -173,7 +173,7 @@ bool Protocol::processSerialData(int timeout){
 		readPacket(packed,MAX_PACKET_SIZE,timeout,timeout);
 		processMessage(packed);
                 return true;
-      	}catch(timeout_error t) {
+      	}catch(iodrivers_base::TimeoutError t) {
 		printf("Timeout from readPacked\n");
 	}
         return false;
@@ -185,11 +185,9 @@ bool Protocol::processSerialData(int timeout){
 void Protocol::processMessage(uint8_t *message) {
 
     base::Time timestamp = base::Time::now();
-    //uint8_t nodeType = message[12];
     uint8_t type = message[10];
 
     switch (type) {
-
     case mtNull:
         fprintf(stderr,"Cannot handle null-Packet\n");
         break;
@@ -218,7 +216,8 @@ void Protocol::processMessage(uint8_t *message) {
     case mtAlive:
         lastKeepAlive = timestamp;
 	requestData();
-        fprintf(stderr,"Got an Alive packet, Found Sonar!\n");
+	requestData();
+        fprintf(stderr,"Got an Alive packet, Found Sonar, should not happten, rerequesting Data!\n");
         break;
     case mtPrgAck:
         fprintf(stderr,"Cannot handle PrgAck-Packet\n");
@@ -233,9 +232,9 @@ void Protocol::processMessage(uint8_t *message) {
 	{
 	uint16_t packedSize = message[13] | (message[14]<<8);
 	if(pts_fd){
-		int toWrite = packedSize;
+		int toWrite = packedSize+1;
 		while(toWrite > 0){
-			int written = write(pts_fd,message+18,toWrite);
+			int written = write(pts_fd,message+15,toWrite);
 			if(written > 0){
 				toWrite-=written;
 			}else{
@@ -244,22 +243,23 @@ void Protocol::processMessage(uint8_t *message) {
 			}
 		}
 	}
-	float depth=0;
-	if(packedSize == 9 && message[18] == '.' && message[22] == 'm'){
-		depth+= ((message[15]-48)) * 100;
-		depth+= ((message[16]-48)) * 10;
-		depth+= ((message[17]-48));
-		depth+= ((message[19]-48))/10.0;
-		depth+= ((message[20]-48))/100.0;
-		depth+= ((message[21]-48))/1000.0;
-		//notifyPeers(timestamp, depth);   
-		//TODO Do something with depth readings 
-	}else{
-		fprintf(stderr,"Cannot HAndle Unknown-AUX port data %s:%s",__FUNCTION__,__FILE__);
-		for(int i=10;i<packedSize;i++){
-			fprintf(stdout,"%c ",message[i]);
-		}
-	}
+        if(message[15+packedSize-1] == 0x0d){ //end of depth message 
+            char tmp[packedSize];
+            memcpy(tmp,message+15,packedSize);
+            tmp[packedSize-1] = '\0'; //make sure string ends correctly
+            int depth = 0;
+            if(sscanf(tmp,"%dmm",&depth) == 1){ //Parsed like 14mm packge
+                double reading = (float)depth/1000.0;
+                GroundDistance gd;
+                gd.time = base::Time::now();
+                gd.distance = reading;
+                notifyPeers(gd);
+                //printf("Current Depth is: %f\n",reading);
+            }
+        }
+
+        printf("\n");
+
 	break;
 	}
     case mtAdcData:
@@ -336,6 +336,15 @@ bool Protocol::init(std::string const &port, int speed){
 				fprintf(stderr,"Cannot get Virtual Sub TTY for subdevice\n\t%s\n",strerror(errno));
 				return false;
 			}
+                        if (grantpt(pts_fd) < 0){
+                            ::close(pts_fd);
+                            return false;
+                        }
+                        if (unlockpt(pts_fd) < 0){
+                            ::close(pts_fd);
+                            return false;
+                        }
+
 		}else{
 			fprintf(stderr,"Cannot create Virtual TTY:\n\t%s\n",strerror(errno));
 			return false;
@@ -349,33 +358,25 @@ const char *Protocol::getSlavePTS(){
 }
 
 int Protocol::extractPacket(uint8_t const* buffer, size_t buffer_size) const{
-
-//	if(buffer_size > 2000) { printf("HUCH: %i,",buffer_size); return -1;}
-//	printf("size: %i \n",buffer_size);
-	
 	if(buffer_size<7) return 0;
-	
 		
 	size_t readPos=0;
-	while (buffer[readPos] != '@' && readPos < buffer_size) {
+
+	//Packed starts with an @ every time, so search for it
+        while (buffer[readPos] != '@' && readPos < buffer_size) {
 		readPos++;
         }
 	
-/*	if(readPos > buffer_size){
-		fprintf(stdout,"Cannot detect Package start readPos: %i, bufferSize %i %02X\n",readPos, buffer_size, buffer[0]);
-		return 0;
-	}
-*/
+        //We are at the end and cannot find the start
 	if(readPos>0){
+#if 0
 		fprintf(stdout,"Skipping %lu bytes.\n",readPos);
-            	//for (int i=0;i<readPos;i++)
-                //	fprintf(stderr,"%02X ",buffer[i]);
-		//fprintf(stderr,"\n");
-		//printf("packet at readPos: (%c) (%02x)\n",buffer[readPos],buffer[readPos]);
+#endif
 		return -readPos;
 	}
 	
-	//Double check length... with other lengh information
+
+	//Double check length, it's twice in the stream, once in binay, once in ascii coded hex value
         size_t len = (buffer[5] | (buffer[6]<<8 )) +5;
 	uint16_t hexlen = 0;
 	char hexsum[5];
@@ -383,8 +384,10 @@ int Protocol::extractPacket(uint8_t const* buffer, size_t buffer_size) const{
 	hexsum[4]=0;
 	
 	sscanf(hexsum,"%hx",&hexlen);
-	//printf("Checks: %i,%i\n",len, hexlen);
+
+        //packed len is smaller than hexlen, use it as simple package check
 	if(len-5 != hexlen){
+#if 0
 		printf("Kaput %lu\n", buffer_size);
 		printf("hex: %c%c%c%c\n",buffer[1],buffer[2],buffer[3],buffer[4]);
 		printf("hex: %x %x %x %x\n",buffer[1],buffer[2],buffer[3],buffer[4]);
@@ -397,26 +400,27 @@ int Protocol::extractPacket(uint8_t const* buffer, size_t buffer_size) const{
             	for (unsigned int i=0;i<buffer_size;i++)
                 	fprintf(stderr,"%02X ",buffer[i]);
 		fprintf(stderr,"\n");
+#endif
 		return -1;
 	}
 	
 	if(len+1 > buffer_size){
-		//printf("Not complete yet (%i)\n",len+1);
 		//Packed Start correct, but not complete yet
 		return 0;
 	}
 
-        if (buffer[len] == 0x0A || buffer[10] == 0x08) {
+        //Cecking for the end of thepackage, if everything is ok, returning it
+        if (buffer[len] == PACKED_END || buffer[10] == 0x08) {
             	return len+1;
         } else {
+#if 0
             fprintf(stderr,"Message doesn't ended with an newline was(%lu): %02X, skip message:\n",len,buffer[len]);
-            //for (int i=0;i<buffer_size;i++)
-            //    fprintf(stderr,"%02X ",buffer[i]);
-	    //fprintf(stderr,"\n");
+#endif
 	    return -1;
         }
-	printf("Hops darf nie passieren\n");
-	return -1;
+
+	//this should be never reached
+        return -1;
 }
 
 

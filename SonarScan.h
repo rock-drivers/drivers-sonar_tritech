@@ -20,9 +20,17 @@ public:
 	virtual ~SonarScan(){};
 };
 
+class GroundDistance : public SonarScan{
+    public:
+        base::Time time;
+        double distance;
+};
+
 class ProfilerScan: public SonarScan{
 public:
 	base::Time time;
+	uint8_t  sweep_code;
+        uint16_t hd_Ctrl;   
 	uint16_t range;
 	uint32_t TxN;
 	uint8_t gain;
@@ -34,7 +42,9 @@ public:
 
 
 ProfilerScan(
-	uint16_t range,
+	uint8_t  sweep_code,
+        uint16_t hd_Ctrl,
+        uint16_t range,
 	uint32_t TxN,
 	uint8_t gain,
 	uint16_t leftLimit,

@@ -14,30 +14,22 @@ class Interface : public SeaNet::SonarHandler{
 	public:
 	Interface(){
 	}
-/*
-	void processDepth(base::Time const& time, double depth){
-		printf("Got Ground distance: %f\n",depth);
-	}
-*/
-	void processSonarScan(SonarScan const *scan){
+	
+        void processSonarScan(SonarScan const *scan){
 		
 		const MicronScan *micron = dynamic_cast<const MicronScan*>(scan);
-		printf("Got Scan with size: %i\n",micron->scanData.size());
-		for(unsigned int i=0;i<micron->scanData.size();i++){
-			printf("%hu ",micron->scanData[i]);
-		}
-		printf("\n");
+		const GroundDistance *gd = dynamic_cast<const GroundDistance*>(scan);
+                if(micron){
+                    printf("Got Scan with size: %i\n",micron->scanData.size());
+                    for(unsigned int i=0;i<micron->scanData.size();i++){
+                            printf("%hu ",micron->scanData[i]);
+                    }
+                    printf("\n");
+                }else if(gd){
+                    printf("Ground distance: %f\n",gd->distance);
+                }
 		
 	};
-/*	
-	virtual void processSonarScan(ProfilerScan const& scan){
-		printf("Got Profiler Scan\n");
-		for(unsigned int i=0;i<scan.scanData.size();i++){
-			printf("%f ",scan.scanData[i]*10e-6*1500.0/2.0);
-		}
-		printf("\n");
-	}
-*/
 };
 
 
@@ -47,24 +39,18 @@ int main(int argc, char* argv[]) {
   si.init(std::string(argv[1]));
 
   printf("Sub PTS Name is: %s\n",si.getSlavePTS());
- /* 
-  if(argc == 4){
-      llpc.setLEDs(atoi(argv[2]));
-    if(argv[3][0] == '1'){
-      llpc.setLaserOverride(true);
-    }else{
-      llpc.setLaserOverride(false);
-    }
-  }else{
-  */
+  
   si.registerHandler(&i);
-  si.sendHeadData(); 
-    si.requestData();
+  
+  SeaNet::Micron::headControl hc = si.getDefaultHeadData();
+  hc.numberOfBins = 600;
+  si.sendHeadData(hc); 
+  si.requestData();
     while(1){
       try {
 	si.processSerialData(1000);
         si.requestData();
-      }catch(timeout_error t) {
+      }catch(iodrivers_base::TimeoutError t) {
 	printf("Timeout\n");
       }
   }
