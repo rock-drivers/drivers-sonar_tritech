@@ -354,7 +354,10 @@ bool Protocol::init(std::string const &port, int speed){
 }
 
 const char *Protocol::getSlavePTS(){
-	return pts_slave;
+    if(createPts)
+        return pts_slave;
+     else
+        return "/dev/null";
 }
 
 int Protocol::extractPacket(uint8_t const* buffer, size_t buffer_size) const{
