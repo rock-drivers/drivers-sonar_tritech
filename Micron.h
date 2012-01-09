@@ -90,10 +90,10 @@ class Driver : public Protocol
 public:
 	Driver(bool usePTS=false);
 	~Driver();
-	void sendHeadData(bool adc8on=true,bool cont=true,bool scanright=false,bool invert=false,bool chan2=false,bool applyoffset=false, bool pingpong=false,uint16_t rangeScale=30, uint16_t leftLimit=1, uint16_t rightLimit=6399, uint8_t adSpan=false, uint8_t adLow=8, uint8_t initialGain=84, uint8_t motorStepDelayTime=25, uint8_t motorStepAngleSize=16,uint16_t adInterval=20, uint16_t numberOfBins=10, uint16_t adcSetpoint=0);
+	void sendHeadData(bool adc8on=true,bool cont=true,bool scanright=false,bool invert=false,bool chan2=false,bool applyoffset=false, bool pingpong=false,uint16_t rangeScale=30, uint16_t leftLimit=1, uint16_t rightLimit=6399, uint8_t adSpan=false, uint8_t adLow=8, uint8_t initialGain=84, uint8_t motorStepDelayTime=25, uint8_t motorStepAngleSize=16,uint16_t adInterval=20, uint16_t numberOfBins=10, uint16_t adcSetpoint=0, uint16_t lockoutTime = (0x97) | (0x03<<8));
 	void processHeadData(u8 *message);
 	void sendHeadData(headControl hc);
-	headControl getDefaultHeadData(bool adc8on=true,bool cont=true,bool scanright=false,bool invert=false,bool chan2=false,bool applyoffset=false, bool pingpong=false,uint16_t rangeScale=30, uint16_t leftLimit=1, uint16_t rightLimit=6399, uint8_t adSpan=false, uint8_t adLow=8, uint8_t initialGain=84, uint8_t motorStepDelayTime=25, uint8_t motorStepAngleSize=16,uint16_t adInterval=20, uint16_t numberOfBins=10, uint16_t adcSetpoint=0);
+	headControl getDefaultHeadData(bool adc8on=true,bool cont=true,bool scanright=false,bool invert=false,bool chan2=false,bool applyoffset=false, bool pingpong=false,uint16_t rangeScale=30, uint16_t leftLimit=1, uint16_t rightLimit=6399, uint8_t adSpan=false, uint8_t adLow=8, uint8_t initialGain=84, uint8_t motorStepDelayTime=25, uint8_t motorStepAngleSize=16,uint16_t adInterval=20, uint16_t numberOfBins=10, uint16_t adcSetpoint=0, uint16_t lockoutTime=(0x97) | (0x03<<8));
 	virtual bool init(std::string const &port, int speed=115200);
 
 

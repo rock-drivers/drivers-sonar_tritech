@@ -67,7 +67,7 @@ void Driver::sendHeadData(headControl hc){
 headControl Driver::getDefaultHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,
 		bool pingpong,uint16_t rangeScale, uint16_t leftLimit, uint16_t rightLimit, uint8_t adSpan, 
 		uint8_t adLow, uint8_t initialGain, uint8_t motorStepDelayTime, uint8_t motorStepAngleSize,
-		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint){
+		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint, uint16_t lockoutTime){
 
 
     headControl hc; 
@@ -115,7 +115,7 @@ headControl Driver::getDefaultHeadData(bool adc8on,bool cont,bool scanright,bool
     //hc.numberOfBins = (0xFF) | (0<<8);
     hc.numberOfBins = numberOfBins;
     hc.maxADBuff = (0xE8) | (3<<8);
-    hc.lockoutTime = (0x97) | (0x03<<8);
+    hc.lockoutTime = lockoutTime;// (0x97) | (0x03<<8);
     hc.minorAxisDir = (0x40) | (0x06<<8);
     hc.majorAxisPan = (0x01);
     hc.crtl2 = 0;
@@ -176,9 +176,9 @@ bool Driver::init(std::string const &port, int speed){
 void Driver::sendHeadData(bool adc8on,bool cont,bool scanright,bool invert,bool chan2,bool applyoffset,
 		bool pingpong,uint16_t rangeScale, uint16_t leftLimit, uint16_t rightLimit, uint8_t adSpan, 
 		uint8_t adLow, uint8_t initialGain, uint8_t motorStepDelayTime, uint8_t motorStepAngleSize,
-		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint) {
+		uint16_t adInterval, uint16_t numberOfBins, uint16_t adcSetpoint,uint16_t lockoutTime) {
 
-	headControl hc = getDefaultHeadData(adc8on,cont,scanright,invert,chan2,applyoffset,pingpong,rangeScale,leftLimit,rightLimit,adSpan,adLow,initialGain,motorStepDelayTime,motorStepAngleSize,adInterval,numberOfBins,adcSetpoint); 
+	headControl hc = getDefaultHeadData(adc8on,cont,scanright,invert,chan2,applyoffset,pingpong,rangeScale,leftLimit,rightLimit,adSpan,adLow,initialGain,motorStepDelayTime,motorStepAngleSize,adInterval,numberOfBins,adcSetpoint,lockoutTime); 
 	sendHeadData(hc);	
 }
 
