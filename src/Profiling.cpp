@@ -1,8 +1,26 @@
-#include "Profiling.h"
-#include "SeaNetTypesInternal.h"
+#include "Profiling.hpp"
+#include "SeaNetTypesInternal.hpp"
 
 namespace sea_net { 
-using namespace profiling;
+
+    enum HeadConfigFlags{
+        ADAPTIVE_GAIN = 1,
+        PRF_ALT = 2,
+        SCANRIGHT = 4,
+        INVERT = 8,
+        MOTOFF = 16,
+        TXOFF = 32,
+        PRF_T10 = 64,
+        CHAN2 = 128,
+        PRF_FIRST = 256,
+        HASMOT = 512,
+        PRF_PINGSYNC = 1024,
+        PRF_SCANSYNC = 2048,
+        STARELLIM = 4096,
+        PRF_MASTER = 8192,
+        PRF_MIRROR = 16384,
+        IGNORESENSOR = 32768
+    };
 
 Profiling::Profiling(bool usePTS): Protocol(0x14,0xFF,usePTS) //0x14 means Profiling Profiling
 {
