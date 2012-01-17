@@ -40,6 +40,50 @@ namespace sea_net
 
     };
 
+    struct AliveData
+    {
+       bool ready;
+       bool motor_on;
+       bool scanning;
+       bool no_config;
+       bool config_send;
+       AliveData():
+           ready(false),motor_on(false),scanning(false),
+           no_config(true),config_send(false){};
+    };
+
+    struct HeadData
+    {
+        uint8_t node_type; 
+        uint8_t type;
+        uint16_t packed_size;
+        uint8_t device_type;
+        uint8_t head_status;
+        uint8_t sweep_code;
+        uint16_t head_control;
+        uint16_t range;
+        uint32_t txn;
+        uint8_t gain;
+        uint16_t slope;
+        uint8_t ad_spawn;
+        uint8_t ad_low;
+        uint16_t heading_offset;
+        uint16_t ad_interval;
+        uint16_t left_limit;
+        uint16_t right_limit;
+        uint8_t steps;
+        uint16_t bearing;
+        uint16_t data_bytes;
+        const uint8_t *scan_data;
+    };
+
+    struct BBUserData
+    {
+        bool full_dublex;
+        BBUserData():
+            full_dublex(0){};
+    };
+
     struct MicronConfig
     {
         base::Angle left_limit;
@@ -53,7 +97,7 @@ namespace sea_net
         double gain;
 
         bool low_resolution;
-        bool scan_right;
+        bool invert;
         bool continous;
 
         MicronConfig():
@@ -66,7 +110,7 @@ namespace sea_net
             speed_of_sound(1500.0),
             gain(0.4),
             low_resolution(false),
-            scan_right(false),
+            invert(false),
             continous(true)
         {};
 
@@ -81,7 +125,7 @@ namespace sea_net
                     other.speed_of_sound== speed_of_sound &&
                     other.gain == gain &&
                     other.low_resolution == low_resolution &&
-                    other.scan_right == scan_right &&
+                    other.invert == invert &&
                     other.continous == continous);
         };
         bool operator!=(const MicronConfig &other) const

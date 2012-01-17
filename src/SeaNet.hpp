@@ -3,9 +3,11 @@
 
 #include <iodrivers_base/Driver.hpp>
 #include "SeaNetTypes.hpp"
+#include "SeaNetTypesInternal.hpp"
 
 namespace sea_net {
 class SeaNetPacket;
+class HeadConfigPacket;
 
 class SeaNet : protected ::iodrivers_base::Driver
 {
@@ -21,7 +23,7 @@ public:
         /** Opens a serial port and sets it up to a sane configuration.
          *
          * Throws UnixError on error */
-        void openSerial(std::string const& port, int baudrate, int timeout);
+        void openSerial(std::string const& port, int baudrate=115200);
 
         /** Clears the input buffer and triggers the device to send 
          *  mtHeadData 
@@ -29,7 +31,9 @@ public:
          * Throws UnixError on error */
         void start();
 
-        /** Reboots the Device and waits for a mtAlive package */
+        /** Reboots the Device and waits for a mtAlive package 
+         *  be careful this takes a while and even if you receive mtAlives
+         *  the device my be in a state where it does not accept mtHeadCommands */
         void reboot(int timeout);
 
         /** Reads one packat from the input buffer and returns its type.
@@ -37,27 +41,37 @@ public:
          *  to get the content of the package */
         PacketType readPacket(int timeout);
 
-        /** gives a reference to the raw data read by readPacket */
-        void getRawData(const uint8_t* &buffer, size_t &size);
-        
-        /** extracts the payload from a mtAux package 
-         *
-         *  call this function if readPacket returns mtAuxData */  
-        void getAuxData(std::vector<uint8_t> &data);
+        void waitForPackage(PacketType type, int timeout);
 
         /** extracts the software version of the device from a mtVersionData package 
          *
          *  call this function if readPacket returns mtVersionData */  
         void getVersion(VersionData &version, int timeout);
 
+        bool isFullDublex(int timeout);
+
+        ///
+        //decode functions 
+        //
+        /** gives a reference to the raw data read by readPacket */
+        void decodeRawData(const uint8_t* &buffer, size_t &size);
+        
+
+        /** extracts the payload from a mtAux package 
+         *
+         *  call this function if readPacket returns mtAuxData */  
+        void decodeAuxData(std::vector<uint8_t> &data);
+
+        void decodeAliveData(AliveData &data);
+
 protected:
         void writeSendData(int timeout);
         virtual int extractPacket(uint8_t const* buffer, size_t buffer_size) const;
         SeaNetPacket* getSeaNetPacket();
 
-private:	
+protected:
+        SeaNetPacket sea_net_packet;
         DeviceType device_type;
-        SeaNetPacket* sea_net_packet;
 }; };
 #endif
 

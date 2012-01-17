@@ -1,7 +1,9 @@
 #ifndef _MICRON_H_
 #define _MICRON_H_ 
 
-#include "SeaNet.hpp" 
+#include "SeaNet.hpp"
+#include "SeaNetTypesInternal.hpp"
+
 #include <base/samples/sonar_beam.h>
 
 namespace sea_net
@@ -14,10 +16,10 @@ namespace sea_net
             Micron();
             ~Micron();
             void configure(const MicronConfig &config,uint32_t timeout);
-            void getSonarBeam(base::samples::SonarBeam &beam);
+            void decodeSonarBeam(base::samples::SonarBeam &beam);
 
         private:
-            HeadConfigPacket * head_config;
+            HeadConfigPacket head_config;
     };
 };
 

@@ -2,28 +2,35 @@
 #define _SEANET_TYPES_INTERNAL_H_
 
 #include "SeaNetTypes.hpp"
+#define SEA_NET_MAX_PACKET_SIZE 1545 // mtHeadData is the biggest package 
 
 namespace sea_net
 {
+
     static const char PACKET_START = '@';
     static const char PACKET_END = 0x0A;
     static const int WRITE_TIMEOUT = 500;  //im ms
-    static const uint32_t MAX_PACKET_SIZE = 1500+45; // mtHeadData is the biggest package 
 
     struct HeadConfigPacket
     {
-        uint8_t V3BParams; uint16_t headControl; uint8_t headType;
-        uint32_t txnCh1; uint32_t txnCh2; uint32_t rxnCh1; uint32_t rxnCh2;
-        uint16_t pulseLength; uint16_t rangeScale; uint16_t leftLimit;
-        uint16_t rightLimit; uint8_t adSpan; uint8_t adLow; uint8_t initialGainCh1;
-        uint8_t initialGainCh2; uint16_t slopeCh1; uint16_t slopeCh2; uint8_t motorStepDelayTime;
-        uint8_t motorStepAngleSize; uint16_t adInterval; uint16_t numberOfBins;
-        uint16_t maxADBuff; uint16_t lockoutTime; uint16_t minorAxisDir;
-        uint8_t majorAxisPan; uint8_t crtl2; uint16_t scanZ; uint8_t adSpanCh1;
-        uint8_t adSpanCh2; uint8_t adLowCh1; uint8_t adLowCh2; uint8_t igainCh1;
-        uint8_t igainCh2; uint8_t adcSetPointCh1; uint8_t adcSetPointCh2;
-        uint16_t slopeCH1; uint16_t slopeCH2; uint16_t slopeDelayCh1;
-        uint16_t slopeDelayCh2;
+        uint8_t V3B_params; uint16_t head_control; uint8_t head_type;
+        uint32_t txn_ch1; uint32_t txn_ch2; uint32_t rxn_ch1; uint32_t rxn_ch2;
+        uint16_t pulse_length; uint16_t range_scale; uint16_t left_limit;
+        uint16_t right_limit; uint8_t ad_span; uint8_t ad_low; uint8_t initial_gain_ch1;
+        uint8_t initial_gain_ch2; uint16_t slope_ch1; uint16_t slope_ch2; uint8_t motor_step_delay_time;
+        uint8_t motor_step_angle_size; uint16_t ad_interval; uint16_t number_of_bins;
+        uint16_t max_ad_buff; uint16_t lockout_time; uint16_t minor_axis_dir;
+        uint8_t major_axis_pan; uint8_t crtl2; uint16_t scan_z; uint8_t ad_span_ch1;
+        uint8_t ad_span_ch2; uint8_t ad_low_ch1; uint8_t ad_low_ch2; uint8_t igain_ch1;
+        uint8_t igain_ch2; uint8_t adc_set_point_ch1; uint8_t adc_set_point_ch2;
+        uint16_t advanced_slope_ch1; uint16_t advance_slope_ch2; uint16_t advanced_slope_delay_ch1;
+        uint16_t advanced_slope_delay_ch2;
+
+        HeadConfigPacket()
+        {
+            //clear everything 
+            memset(this,0,sizeof(*this));
+        }
     } __attribute__ ((packed)) __attribute__((__may_alias__));
 
 
@@ -46,15 +53,21 @@ namespace sea_net
 
             bool isValid() const;
             PacketType getPacketType() const;
-            DeviceType getDeviceType() const;
+            DeviceType getReceiverType() const;
+            DeviceType getSenderType() const;
 
             void getRawData(const uint8_t * &buffer,size_t &size)const;
-            void getAuxData(const uint8_t * &buffer,size_t &size)const;
+
+            void decodeAliveData(AliveData &data);
+            void decodeHeadData(HeadData &data);
+            void decodeAuxData(std::vector<uint8_t> &aux_data);
+            void decodeVersionData(VersionData &version);
+            void decodeBBUserData(BBUserData &data);
 
         private:
         //we do not use a std::vector because this would introduce
         //dynamic memory allocation if different packet types are stored
-            uint8_t packet[MAX_PACKET_SIZE];
+            uint8_t packet[SEA_NET_MAX_PACKET_SIZE];
             size_t size;
             bool valid;
     };
