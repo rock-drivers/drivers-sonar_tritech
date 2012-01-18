@@ -23,8 +23,7 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
         readPos++;
     }
     if(readPos>0){
-        LOG_WARN_S << "Corrupted packet: Skipping " << readPos << " bytes because no start was found." 
-                   << std::endl;
+        LOG_WARN_S << "Corrupted packet: Skipping " << readPos << " bytes because no start was found.";
         return -readPos;
     }
 
@@ -39,7 +38,7 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
     if(len != hexlen)
     {
         LOG_WARN_S << "Corrupted packet: Binary packet size differs from hexadecimal: bin:"
-                   << len << " hex: "<< hexlen << std::endl;
+                   << len << " hex: "<< hexlen ;
         return -1;      
     }
 
@@ -54,7 +53,7 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
     {
         //DeviceType device_type = (DeviceType) buffer[8];
         PacketType type = (PacketType) buffer[10];
-        LOG_DEBUG_S << "Found packet of type "<< type << " and size "<< len << std::endl;
+        LOG_DEBUG_S << "Found packet of type "<< type << " and size "<< len ;
 
         //check packet size
         switch(type)
@@ -79,7 +78,7 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
                 uint16_t data_bytes = buffer[42]|(((uint16_t)buffer[43])<<8);
                 if((uint16_t)len == data_bytes+45 && (uint16_t)len == total+14 )
                     return len;
-                LOG_WARN_S << "Corrupted mtHeadData: Size miss match" << std::endl;
+                LOG_WARN_S << "Corrupted mtHeadData: Size miss match" ;
             }
             break;
         case mtAuxData:
@@ -88,7 +87,7 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
                 uint16_t payload_size = buffer[13] | (buffer[14]<<8);
                 if((uint16_t)len == payload_size+16)
                     return len;
-                LOG_WARN_S << "Corrupted mtAuxData: Size miss match" << std::endl;
+                LOG_WARN_S << "Corrupted mtAuxData: Size miss match" ;
             }
             break;
         case mtVersionData:
@@ -115,10 +114,10 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
             return len;
         }
         LOG_WARN_S << "Corrupted packet: Wrong packet size for packet type:"<< type <<" . size:" 
-                   << len << std::endl;
+                   << len ;
         return -1;
     }
-    LOG_WARN_S << "Corrupted packet: No Message end was found" << std::endl;
+    LOG_WARN_S << "Corrupted packet: No Message end was found" ;
     return -1; 
 }
 
@@ -127,7 +126,7 @@ std::vector<uint8_t> SeaNetPacket::createPaket(DeviceType device_type,
         uint8_t* payload,
         size_t payload_size)
 {
-    LOG_DEBUG_S << "Create new packet of type "<< packet_type << " with payload_size "<< payload_size << std::endl;
+    LOG_DEBUG_S << "Create new packet of type "<< packet_type << " with payload_size "<< payload_size ;
     
     std::vector<uint8_t> packet;
 
@@ -260,13 +259,13 @@ void SeaNetPacket::decodeHeadData(HeadData &data)
     data.txn           = packet[22] | (packet[23]<<8) | (packet[24]<<16) | (packet[25]<<24);
     data.gain           = packet[26];
     data.slope         = packet[27] | (packet[28]<<8);
-    data.ad_spawn        = packet[29];
+    data.ad_span        = packet[29];
     data.ad_low          = packet[30];
     data.heading_offset = packet[31] | (packet[32]<<8);
     data.ad_interval    = packet[33] | (packet[34]<<8);
     data.left_limit     = packet[35] | (packet[36]<<8);
     data.right_limit    = packet[37] | (packet[38]<<8);
-    data.steps          = packet[39];
+    data.motor_step_angle_size          = packet[39];
     data.bearing       = packet[40] | (packet[41]<<8);
     data.data_bytes     = packet[42] | (packet[43]<<8);
     data.scan_data      = &packet[44];

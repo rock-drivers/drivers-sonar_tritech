@@ -1,5 +1,5 @@
-#ifndef _MICRON_H_
-#define _MICRON_H_ 
+#ifndef _SEANETMICRON_H_
+#define _SEANETMICRON_H_ 
 
 #include "SeaNet.hpp"
 #include "SeaNetTypesInternal.hpp"
@@ -19,7 +19,7 @@ namespace sea_net
             void decodeSonarBeam(base::samples::SonarBeam &beam);
 
         private:
-            HeadConfigPacket head_config;
+            HeadCommand head_config;
     };
 };
 

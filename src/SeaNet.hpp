@@ -24,12 +24,14 @@ public:
          *
          * Throws UnixError on error */
         void openSerial(std::string const& port, int baudrate=115200);
+        void close();
 
         /** Clears the input buffer and triggers the device to send 
          *  mtHeadData 
          *
          * Throws UnixError on error */
         void start();
+        void stop();
 
         /** Reboots the Device and waits for a mtAlive package 
          *  be careful this takes a while and even if you receive mtAlives
@@ -41,7 +43,7 @@ public:
          *  to get the content of the package */
         PacketType readPacket(int timeout);
 
-        void waitForPackage(PacketType type, int timeout);
+        void waitForPacket(PacketType type, int timeout);
 
         /** extracts the software version of the device from a mtVersionData package 
          *
@@ -64,14 +66,18 @@ public:
 
         void decodeAliveData(AliveData &data);
 
+        void setWriteTimeout(uint32_t timeout);
+
 protected:
         void writeSendData(int timeout);
+        void writeHeadCommand(HeadCommand &hc, int timeout);
         virtual int extractPacket(uint8_t const* buffer, size_t buffer_size) const;
         SeaNetPacket* getSeaNetPacket();
 
 protected:
         SeaNetPacket sea_net_packet;
         DeviceType device_type;
+        bool bstart;
 }; };
 #endif
 

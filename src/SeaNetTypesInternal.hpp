@@ -11,7 +11,7 @@ namespace sea_net
     static const char PACKET_END = 0x0A;
     static const int WRITE_TIMEOUT = 500;  //im ms
 
-    struct HeadConfigPacket
+    struct HeadCommand
     {
         uint8_t V3B_params; uint16_t head_control; uint8_t head_type;
         uint32_t txn_ch1; uint32_t txn_ch2; uint32_t rxn_ch1; uint32_t rxn_ch2;
@@ -26,13 +26,56 @@ namespace sea_net
         uint16_t advanced_slope_ch1; uint16_t advance_slope_ch2; uint16_t advanced_slope_delay_ch1;
         uint16_t advanced_slope_delay_ch2;
 
-        HeadConfigPacket()
+        HeadCommand()
         {
             //clear everything 
             memset(this,0,sizeof(*this));
         }
     } __attribute__ ((packed)) __attribute__((__may_alias__));
 
+    struct AliveData
+    {
+       bool ready;
+       bool motor_on;
+       bool scanning;
+       bool no_config;
+       bool config_send;
+       AliveData():
+           ready(false),motor_on(false),scanning(false),
+           no_config(true),config_send(false){};
+    };
+
+    struct HeadData
+    {
+        uint8_t node_type; 
+        uint8_t type;
+        uint16_t packed_size;
+        uint8_t device_type;
+        uint8_t head_status;
+        uint8_t sweep_code;
+        uint16_t head_control;
+        uint16_t range;
+        uint32_t txn;
+        uint8_t gain;
+        uint16_t slope;
+        uint8_t ad_span;
+        uint8_t ad_low;
+        uint16_t heading_offset;
+        uint16_t ad_interval;
+        uint16_t left_limit;
+        uint16_t right_limit;
+        uint8_t motor_step_angle_size;
+        uint16_t bearing;
+        uint16_t data_bytes;
+        const uint8_t *scan_data;
+    };
+
+    struct BBUserData
+    {
+        bool full_dublex;
+        BBUserData():
+            full_dublex(0){};
+    };
 
     class SeaNetPacket
     {

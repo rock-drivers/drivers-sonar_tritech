@@ -1,4 +1,4 @@
-#include "Micron.hpp"
+#include "SeaNetMicron.hpp"
 #include "SeaNetTypesInternal.hpp"
 #include <iodrivers_base/Timeout.hpp>
 #include <iostream>
@@ -25,7 +25,7 @@ Micron::~Micron()
 
 void Micron::decodeSonarBeam(base::samples::SonarBeam &sonar_beam)
 {
-    LOG_DEBUG_S <<"decoding SonarBeam" << std::endl;
+    LOG_DEBUG_S <<"decoding SonarBeam" ;
     if(sea_net_packet.getSenderType() != IMAGINGSONAR)
         throw std::runtime_error("Micron::getSonarBeam: Wrong device type");
 
@@ -37,19 +37,22 @@ void Micron::decodeSonarBeam(base::samples::SonarBeam &sonar_beam)
     //some other values are dynamically by the device like MOTOFF
     if( head_config.left_limit != data.left_limit ||
         head_config.right_limit != data.right_limit ||
+        head_config.motor_step_angle_size != data.motor_step_angle_size || 
+        head_config.ad_low != data.ad_low || 
+        head_config.ad_span != data.ad_span ||
         (head_config.head_control &(CONT|ADC8ON|INVERT)) !=(data.head_control &(CONT|ADC8ON|INVERT)))
     {
-        LOG_ERROR_S << "Configuration of the beam differs from the desired one." << std::endl;
-        LOG_ERROR_S << "left_limit " << head_config.left_limit << " / " << data.left_limit << std::endl; 
-        LOG_ERROR_S << "rigth_limit " << head_config.right_limit << " / " << data.right_limit << std::endl; 
-        LOG_ERROR_S << "head_control " << head_config.head_control << " / " << data.head_control << std::endl; 
+        LOG_ERROR_S << "Configuration of the beam differs from the desired one." ;
+        LOG_ERROR_S << "left_limit " << head_config.left_limit << " / " << data.left_limit ; 
+        LOG_ERROR_S << "rigth_limit " << head_config.right_limit << " / " << data.right_limit ; 
+        LOG_ERROR_S << "head_control " << head_config.head_control << " / " << data.head_control ; 
         throw std::runtime_error("Configuration of the beam differs from the desired one.");
     }
 
     //copy data into SonarBeam
     sonar_beam.time = base::Time::now();
     sonar_beam.sampling_interval  = ((data.ad_interval*640.0)*1e-9);
-    sonar_beam.bearing     = base::Angle::fromRad(M_PI-(data.bearing/6399.0*2.0*M_PI));
+    sonar_beam.bearing     = base::Angle::fromRad((data.bearing/6399.0*2.0*M_PI)+M_PI);
     sonar_beam.speed_of_sound = 1500;
     sonar_beam.beamwidth_vertical = 35.0/180.0*M_PI;
     sonar_beam.beamwidth_horizontal = 3.0/180.0*M_PI;
@@ -64,17 +67,19 @@ void Micron::configure(const MicronConfig &config,uint32_t timeout)
     //some conversions
     int ad_interval = (((config.resolution/config.speed_of_sound)*2.0)*1e9)/640.0;
     int number_of_bins = config.max_distance/config.resolution;
-    uint16_t left_limit = (((config.left_limit.rad+M_PI)/(M_PI*2.0))*6399.0);
-    uint16_t right_limit = (((config.right_limit.rad+M_PI)/(M_PI*2.0))*6399.0);
+    uint16_t left_limit = (((config.right_limit.rad+M_PI)/(M_PI*2.0))*6399.0);     //sonars coordinate system is clock wise!!!
+    uint16_t right_limit = (((config.left_limit.rad+M_PI)/(M_PI*2.0))*6399.0);     //therefore we have to swap left and right!!!
     uint8_t motor_step_angle_size = config.angular_resolution.rad/(M_PI*2.0)*6399.0;
     uint8_t initial_gain = config.gain*210;
-    uint16_t lockout_time = (config.min_distance*2.0/config.speed_of_sound*1e6);  //in microseconds 
+
+    LOG_INFO_S << "Configure Sonar";
+    LOG_DEBUG_S << "ad_interval:" << ad_interval << " number_of_bins:" << number_of_bins << " left_limit:" << left_limit
+                << " right_limit:" << right_limit << " motor_step_angle_size:" << (int)motor_step_angle_size << " initial_gain:";
 
     //check configuration 
     if(config.gain < 0.0 || config.gain > 1.0 ||
        config.angular_resolution.rad < 0 || config.angular_resolution.rad / (0.05625/180.0*M_PI) > 255.0 ||
-       ad_interval < 0 || ad_interval > 1500 || number_of_bins < 0 || number_of_bins > 1500 || config.min_distance < 0 ||
-       config.min_distance > 98.0 )
+       ad_interval < 0 || ad_interval > 1500 || number_of_bins < 0 || number_of_bins > 1500 )
     {
         throw std::runtime_error("Micron::Micron: invalid configuration.");
     }
@@ -94,37 +99,15 @@ void Micron::configure(const MicronConfig &config,uint32_t timeout)
     head_config.ad_interval = ad_interval;
     head_config.number_of_bins = number_of_bins;
     head_config.max_ad_buff = (0xE8) | (3<<8);
-    head_config.lockout_time = lockout_time;
+    head_config.lockout_time = 100;
     head_config.minor_axis_dir = (0x40) | (0x06<<8);
     head_config.major_axis_pan = (0x01);
 
     //SCANRIGHT is always 1 for microns dst even if the flag is not set
     head_config.head_control =
-        (((!config.low_resolution)?ADC8ON:0) | (config.continous?CONT:0) |
-        (config.invert?INVERT:0) | RAW | HASMOT | REPLYASL | CHAN2 );
-        
-    iodrivers_base::Timeout time_out(timeout);
-    std::vector<uint8_t> packet = SeaNetPacket::createPaket(IMAGINGSONAR,
-                                                           mtHeadCommand,
-                                                           (uint8_t*)&head_config,
-                                                            sizeof(head_config));
-    LOG_DEBUG_S <<"Sent mtHeadCommand packet" << std::endl;
-    writePacket(&packet[0],packet.size(),time_out.timeLeft());
-
-    clear();
-
-    //wait for an alive packet to check if the sonar is configured
-    AliveData alive_data;
-    while(!alive_data.ready && alive_data.no_config && !alive_data.config_send)
-    {
-        std::cout << "not ready" << std::endl;
-        waitForPackage(mtAlive,time_out.timeLeft());
-        sea_net_packet.decodeAliveData(alive_data);
-    }
-
-    //wait for head data 
-    writeSendData(time_out.timeLeft());
-    waitForPackage(mtHeadData,time_out.timeLeft());
+        (((!config.low_resolution)?ADC8ON:0)|(config.continous?CONT:0)|RAW|HASMOT|REPLYASL|CHAN2 );
+    
+    writeHeadCommand(head_config,timeout);
 }
 
 
