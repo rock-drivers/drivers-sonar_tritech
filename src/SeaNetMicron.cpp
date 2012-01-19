@@ -51,15 +51,34 @@ void Micron::decodeSonarBeam(base::samples::SonarBeam &sonar_beam)
 
     //copy data into SonarBeam
     sonar_beam.time = base::Time::now();
-    sonar_beam.sampling_interval  = ((data.ad_interval*640.0)*1e-9);
+    sonar_beam.sampling_interval  = ((640.0*data.ad_interval)*1e-9);
     sonar_beam.bearing     = base::Angle::fromRad((data.bearing/6399.0*2.0*M_PI)+M_PI);
-    sonar_beam.speed_of_sound = 1500;
+    sonar_beam.speed_of_sound = speed_of_sound;
     sonar_beam.beamwidth_vertical = 35.0/180.0*M_PI;
     sonar_beam.beamwidth_horizontal = 3.0/180.0*M_PI;
 
-    //TODO check if we are using low resolution 
-    sonar_beam.beam.resize(data.data_bytes);
-    memcpy(&sonar_beam.beam[0], data.scan_data, data.data_bytes);
+    //the micron dst is not using the lockout_time value
+    //therefore we are removing the values here 
+    //lockout_time is in microseconds and sampling_interval in sec
+    size_t lockouts = head_config.lockout_time/(10e6*sonar_beam.sampling_interval); 
+    LOG_DEBUG_S << "Erasing " << lockouts<< " bins because of lockout_time." ;
+    if(data.head_control & ADC8ON == 1)
+    {
+        sonar_beam.beam.resize(data.data_bytes,0);
+        memcpy(&sonar_beam.beam[0]+lockouts, data.scan_data+lockouts, data.data_bytes-lockouts);
+    }
+    else
+    {
+        //low resolution is used
+        //this means each bin has 4 Bits instead of 8 Bits
+        //scale it up to values between 0 and 255
+        sonar_beam.beam.resize(lockouts,0);
+        for(int i=lockouts;i<data.data_bytes;++i)
+        {
+            sonar_beam.beam.push_back((data.scan_data[i]&0x0F)*17);
+            sonar_beam.beam.push_back((data.scan_data[i] >> 4)*17);
+        }
+    }
 }
 
 void Micron::configure(const MicronConfig &config,uint32_t timeout)
@@ -71,10 +90,12 @@ void Micron::configure(const MicronConfig &config,uint32_t timeout)
     uint16_t right_limit = (((config.left_limit.rad+M_PI)/(M_PI*2.0))*6399.0);     //therefore we have to swap left and right!!!
     uint8_t motor_step_angle_size = config.angular_resolution.rad/(M_PI*2.0)*6399.0;
     uint8_t initial_gain = config.gain*210;
+    uint16_t lockout_time = 2.0*config.min_distance/config.speed_of_sound*10e6;
 
     LOG_INFO_S << "Configure Sonar";
     LOG_DEBUG_S << "ad_interval:" << ad_interval << " number_of_bins:" << number_of_bins << " left_limit:" << left_limit
-                << " right_limit:" << right_limit << " motor_step_angle_size:" << (int)motor_step_angle_size << " initial_gain:";
+                << " right_limit:" << right_limit << " motor_step_angle_size:" << (int)motor_step_angle_size << " initial_gain:"
+                << " lockout_time:" << lockout_time;
 
     //check configuration 
     if(config.gain < 0.0 || config.gain > 1.0 ||
@@ -83,6 +104,8 @@ void Micron::configure(const MicronConfig &config,uint32_t timeout)
     {
         throw std::runtime_error("Micron::Micron: invalid configuration.");
     }
+
+    speed_of_sound = config.speed_of_sound;
 
     //generate head data
     head_config.V3B_params = 0x1D;
@@ -102,6 +125,7 @@ void Micron::configure(const MicronConfig &config,uint32_t timeout)
     head_config.lockout_time = 100;
     head_config.minor_axis_dir = (0x40) | (0x06<<8);
     head_config.major_axis_pan = (0x01);
+    head_config.lockout_time = lockout_time; 
 
     //SCANRIGHT is always 1 for microns dst even if the flag is not set
     head_config.head_control =

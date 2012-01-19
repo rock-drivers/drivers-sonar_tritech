@@ -20,6 +20,7 @@ namespace sea_net
 
         private:
             HeadCommand head_config;
+            double speed_of_sound;
     };
 };
 

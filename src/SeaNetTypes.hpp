@@ -49,6 +49,7 @@ namespace sea_net
         base::Angle angular_resolution; 
 
         double max_distance;
+        double min_distance;
         double resolution;
         double speed_of_sound;
         double gain;
@@ -61,6 +62,7 @@ namespace sea_net
             right_limit(base::Angle::fromRad(-M_PI)),
             angular_resolution(base::Angle::fromRad(5.0/180.0*M_PI)),
             max_distance(15.0),
+            min_distance(1.0),
             resolution(0.1),
             speed_of_sound(1500.0),
             gain(0.4),
@@ -74,6 +76,7 @@ namespace sea_net
                     other.right_limit == right_limit &&
                     other.angular_resolution == angular_resolution &&
                     other.max_distance == max_distance && 
+                    other.min_distance == min_distance && 
                     other.resolution == resolution &&
                     other.speed_of_sound== speed_of_sound &&
                     other.gain == gain &&
