@@ -52,7 +52,7 @@ void Micron::decodeSonarBeam(base::samples::SonarBeam &sonar_beam)
     //copy data into SonarBeam
     sonar_beam.time = base::Time::now();
     sonar_beam.sampling_interval  = ((640.0*data.ad_interval)*1e-9);
-    sonar_beam.bearing     = base::Angle::fromRad((data.bearing/6399.0*2.0*M_PI)+M_PI);
+    sonar_beam.bearing = base::Angle::fromRad(-(data.bearing/6399.0*2.0*M_PI)+M_PI);
     sonar_beam.speed_of_sound = speed_of_sound;
     sonar_beam.beamwidth_vertical = 35.0/180.0*M_PI;
     sonar_beam.beamwidth_horizontal = 3.0/180.0*M_PI;
