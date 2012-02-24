@@ -5,6 +5,7 @@
 #include "SeaNetTypesInternal.hpp"
 
 #include <base/samples/sonar_beam.h>
+#include <base/samples/rigid_body_state.h>
 
 namespace sea_net
 { 
@@ -17,6 +18,7 @@ namespace sea_net
             ~Micron();
             void configure(const MicronConfig &config,uint32_t timeout);
             void decodeSonarBeam(base::samples::SonarBeam &beam);
+            void decodeEchoSounder(base::samples::RigidBodyState &state);
 
         private:
             HeadCommand head_config;

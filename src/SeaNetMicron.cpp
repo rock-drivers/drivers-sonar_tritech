@@ -62,7 +62,7 @@ void Micron::decodeSonarBeam(base::samples::SonarBeam &sonar_beam)
     //lockout_time is in microseconds and sampling_interval in sec
     size_t lockouts = head_config.lockout_time/(10e6*sonar_beam.sampling_interval); 
     LOG_DEBUG_S << "Erasing " << lockouts<< " bins because of lockout_time." ;
-    if(data.head_control & ADC8ON == 1)
+    if((data.head_control & ADC8ON) == 1)
     {
         sonar_beam.beam.resize(data.data_bytes,0);
         memcpy(&sonar_beam.beam[0]+lockouts, data.scan_data+lockouts, data.data_bytes-lockouts);
@@ -132,6 +132,28 @@ void Micron::configure(const MicronConfig &config,uint32_t timeout)
         (((!config.low_resolution)?ADC8ON:0)|(config.continous?CONT:0)|RAW|HASMOT|REPLYASL|CHAN2 );
     
     writeHeadCommand(head_config,timeout);
+}
+
+void Micron::decodeEchoSounder(base::samples::RigidBodyState &state)
+{
+    LOG_DEBUG_S <<"decoding EchoSounder" ;
+    if(sea_net_packet.getSenderType() != IMAGINGSONAR)
+        throw std::runtime_error("Micron::getSonarBeam: Wrong device type");
+    
+    state.invalidate();
+    std::vector<uint8_t> data;
+    sea_net_packet.decodeAuxData(data);
+    data.back() = '\0'; //make sure string ends correctly
+    int depth = 0;
+    if(sscanf((const char*)&data[0],"%dmm",&depth) == 1)
+    {
+        state.position[2] = 0.001*depth; //We want Si units not mm
+        state.time = base::Time::now();
+        state.cov_position(2,2) = 0.2;
+        LOG_DEBUG_S <<"decoding EchoSounder: got depth:" << state.position[2];
+    }
+    else
+        throw std::runtime_error("Cannot decode EchoSounder. Depth was not find in the package");
 }
 
 
