@@ -86,8 +86,8 @@ void Micron::configure(const MicronConfig &config,uint32_t timeout)
     //some conversions
     int ad_interval = (((config.resolution/config.speed_of_sound)*2.0)*1e9)/640.0;
     int number_of_bins = config.max_distance/config.resolution;
-    uint16_t left_limit = (((M_PI-config.right_limit.rad)/(M_PI*2.0))*6399.0);     //sonars coordinate system is clock wise!!!
-    uint16_t right_limit = (((M_PI-config.left_limit.rad)/(M_PI*2.0))*6399.0);     //therefore we have to swap left and right!!!
+    uint16_t left_limit = (((M_PI-config.left_limit.rad)/(M_PI*2.0))*6399.0);
+    uint16_t right_limit = (((M_PI-config.right_limit.rad)/(M_PI*2.0))*6399.0);
     uint8_t motor_step_angle_size = config.angular_resolution.rad/(M_PI*2.0)*6399.0;
     uint8_t initial_gain = config.gain*210;
     uint16_t lockout_time = 2.0*config.min_distance/config.speed_of_sound*10e6;
