@@ -45,6 +45,9 @@ void Micron::decodeSonarBeam(base::samples::SonarBeam &sonar_beam)
         LOG_ERROR_S << "Configuration of the beam differs from the desired one." ;
         LOG_ERROR_S << "left_limit " << head_config.left_limit << " / " << data.left_limit ; 
         LOG_ERROR_S << "rigth_limit " << head_config.right_limit << " / " << data.right_limit ; 
+        LOG_ERROR_S << "angle size " << head_config.motor_step_angle_size << " / " << data.motor_step_angle_size ; 
+        LOG_ERROR_S << "ad low " << head_config.ad_low << " / " << data.ad_low ; 
+        LOG_ERROR_S << "ad span " << head_config.ad_span << " / " << data.ad_span ; 
         LOG_ERROR_S << "head_control " << head_config.head_control << " / " << data.head_control ; 
         throw std::runtime_error("Configuration of the beam differs from the desired one.");
     }
