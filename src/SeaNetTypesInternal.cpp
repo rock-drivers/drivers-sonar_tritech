@@ -75,9 +75,19 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
             {
                 //read number of data bytes
                 uint16_t total = buffer[13]|(((uint16_t)buffer[14])<<8);
-                uint16_t data_bytes = buffer[42]|(((uint16_t)buffer[43])<<8);
-                if((uint16_t)len == data_bytes+45 && (uint16_t)len == total+14 )
-                    return len;
+                if((DeviceType)buffer[7] == PROFILINGSONAR)
+                {
+                    uint16_t data_count = buffer[38]|(((uint16_t)buffer[39])<<8);
+                    uint16_t data_bytes = data_count * 2;
+                    if((uint16_t)len == data_bytes+51 && (uint16_t)len == total+14 )
+                        return len;
+                }
+                else
+                {
+                    uint16_t data_bytes = buffer[42]|(((uint16_t)buffer[43])<<8);
+                    if((uint16_t)len == data_bytes+45 && (uint16_t)len == total+14 )
+                        return len;
+                }
                 LOG_WARN_S << "Corrupted mtHeadData: Size miss match" ;
             }
             break;
@@ -242,10 +252,13 @@ void SeaNetPacket::decodeAliveData(AliveData &data)
     data.config_send = packet[20]&128;
 }
 
-void SeaNetPacket::decodeHeadData(HeadData &data)
+void SeaNetPacket::decodeHeadData(ImagingHeadData &data)
 {
     if(getPacketType() != mtHeadData)
         throw std::runtime_error("Cannot decode mtHeadData. Wrong packet type is buffered.");
+    
+    if(getSenderType() != IMAGINGSONAR)
+        throw std::runtime_error("Cannot decode mtHeadData. Sender isn't an imaging sonar.");
 
     //extract alive data data
     data.node_type = packet[12];
@@ -269,6 +282,36 @@ void SeaNetPacket::decodeHeadData(HeadData &data)
     data.bearing       = packet[40] | (packet[41]<<8);
     data.data_bytes     = packet[42] | (packet[43]<<8);
     data.scan_data      = &packet[44];
+}
+
+void SeaNetPacket::decodeHeadData(ProfilingHeadData& data)
+{
+    if(getPacketType() != mtHeadData)
+        throw std::runtime_error("Cannot decode mtHeadData. Wrong packet type is buffered.");
+    
+    if(getSenderType() != PROFILINGSONAR)
+        throw std::runtime_error("Cannot decode mtHeadData. Sender isn't a profiling sonar.");
+    
+    //extract alive data
+    data.node_type      = packet[12];
+    data.type           = packet[10];
+    data.packed_size    = packet[13] | (packet[14]<<8);
+    data.device_type    = packet[15];
+    data.head_status    = packet[16];
+    data.sweep_code     = packet[17];
+    data.head_control   = packet[18] | (packet[19]<<8);
+    data.range          = packet[20] | (packet[21]<<8);
+    data.txn            = packet[22] | (packet[23]<<8) | (packet[24]<<16) | (packet[25]<<24);
+    data.gain           = packet[26];
+    data.slope          = packet[27] | (packet[28]<<8);
+    data.ad_threshold   = packet[29];
+    data.filt_gain      = packet[30];
+    data.left_limit     = packet[31] | (packet[32]<<8);
+    data.right_limit    = packet[33] | (packet[34]<<8);
+    data.motor_step_angle_size = packet[35];
+    data.scan_time      = packet[36] | (packet[37]<<8);
+    data.data_count     = packet[38] | (packet[39]<<8);
+    data.scan_data      = &packet[40];
 }
 
 void SeaNetPacket::decodeAuxData(std::vector<uint8_t> &aux_data)

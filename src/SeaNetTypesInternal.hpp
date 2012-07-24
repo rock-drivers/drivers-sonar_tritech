@@ -23,7 +23,7 @@ namespace sea_net
         uint8_t major_axis_pan; uint8_t crtl2; uint16_t scan_z; uint8_t ad_span_ch1;
         uint8_t ad_span_ch2; uint8_t ad_low_ch1; uint8_t ad_low_ch2; uint8_t igain_ch1;
         uint8_t igain_ch2; uint8_t adc_set_point_ch1; uint8_t adc_set_point_ch2;
-        uint16_t advanced_slope_ch1; uint16_t advance_slope_ch2; uint16_t advanced_slope_delay_ch1;
+        uint16_t advanced_slope_ch1; uint16_t advanced_slope_ch2; uint16_t advanced_slope_delay_ch1;
         uint16_t advanced_slope_delay_ch2;
 
         HeadCommand()
@@ -44,8 +44,10 @@ namespace sea_net
            ready(false),motor_on(false),scanning(false),
            no_config(true),config_send(false){};
     };
+    
+    
 
-    struct HeadData
+    struct ImagingHeadData
     {
         uint8_t node_type; 
         uint8_t type;
@@ -67,6 +69,29 @@ namespace sea_net
         uint8_t motor_step_angle_size;
         uint16_t bearing;
         uint16_t data_bytes;
+        const uint8_t *scan_data;
+    };
+    
+    struct ProfilingHeadData
+    {
+        uint8_t node_type; 
+        uint8_t type;
+        uint16_t packed_size;
+        uint8_t device_type;
+        uint8_t head_status;
+        uint8_t sweep_code;
+        uint16_t head_control;
+        uint16_t range;
+        uint32_t txn;
+        uint8_t gain;
+        uint16_t slope;
+        uint8_t ad_threshold;
+        uint8_t filt_gain;
+        uint16_t left_limit;
+        uint16_t right_limit;
+        uint8_t motor_step_angle_size;
+        uint16_t scan_time;
+        uint16_t data_count;
         const uint8_t *scan_data;
     };
 
@@ -102,7 +127,8 @@ namespace sea_net
             void getRawData(const uint8_t * &buffer,size_t &size)const;
 
             void decodeAliveData(AliveData &data);
-            void decodeHeadData(HeadData &data);
+            void decodeHeadData(ImagingHeadData &data);
+            void decodeHeadData(ProfilingHeadData &data);
             void decodeAuxData(std::vector<uint8_t> &aux_data);
             void decodeVersionData(VersionData &version);
             void decodeBBUserData(BBUserData &data);
