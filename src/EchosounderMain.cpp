@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Echosounder.hpp"
+#include "SeaNetEchosounder.hpp"
 int main(int argc, char** argv)
 {
     sea_net::Echosounder e;

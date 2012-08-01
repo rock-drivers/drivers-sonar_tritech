@@ -1,5 +1,5 @@
-#ifndef _SEANET_H_
-#define _SEANET_H_ 
+#ifndef _SEANETECHOSOUNDER_H_
+#define _SEANETECHOSOUNDER_H_
 
 #include <iodrivers_base/Driver.hpp>
 #include <base/samples/rigid_body_state.h>
