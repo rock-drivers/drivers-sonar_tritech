@@ -46,12 +46,11 @@ void Profiling::configure(const ProfilingConfig& config, uint32_t timeout)
     uint16_t slope_ch1 = 114 + ((config.frequency_chan1 - 600000) / 600000) * 36;
     uint16_t slope_ch2 = 114 + ((config.frequency_chan2 - 600000) / 600000) * 36;
     uint16_t pulse_length = (config.max_distance + 10) * 25 / 10;
+    uint16_t range_scale = (uint16_t)(config.max_distance * 10.0) & 0x3FFF;
     uint16_t lockout_time = 542 - ((config.frequency_chan1 - 600000) / 600000) * 271;
     uint16_t head_control = PRF_ALT | PRF_FIRST | HASMOT | PRF_MASTER;
     if(config.select_channel == 2)
         head_control = head_control | CHAN2;
-
-    std::cerr << freq_chan1_tx << " " << freq_chan1_rx << " " << freq_chan2_tx << " " << freq_chan2_rx << std::endl;
     
     LOG_INFO_S << "Configure Sonar";
     LOG_DEBUG_S << " right_limit:" << right_limit << " motor_step_angle_size:" << (int)motor_step_angle_size << " initial_gain:"
@@ -61,7 +60,7 @@ void Profiling::configure(const ProfilingConfig& config, uint32_t timeout)
     if(config.gain < 0.0 || config.gain > 1.0 ||
        config.angular_resolution.rad < 0 || config.angular_resolution.rad / (0.05625/180.0*M_PI) > 255.0 ||
         config.frequency_chan1 < 600000 || config.frequency_chan1 > 1200000 || config.frequency_chan2 < 600000 || config.frequency_chan2 > 1200000 ||
-        config.filt_gain < 0.0 || config.filt_gain > 1.0 || config.select_channel < 1 || config.select_channel > 2)
+        config.filt_gain < 0.0 || config.filt_gain > 1.0 || config.select_channel < 1 || config.select_channel > 2 || config.max_distance > 16383.0 || config.max_distance < 0.0)
     {
         throw std::runtime_error("Profiling::Profiling: invalid configuration.");
     }
@@ -77,7 +76,7 @@ void Profiling::configure(const ProfilingConfig& config, uint32_t timeout)
     profiling_head_config.rxn_ch1 = freq_chan1_rx;
     profiling_head_config.rxn_ch2 = freq_chan2_rx;
     profiling_head_config.pulse_length = pulse_length;
-    profiling_head_config.range_scale = 20;
+    profiling_head_config.range_scale = range_scale;
     profiling_head_config.left_limit = left_limit; 
     profiling_head_config.right_limit = right_limit;
     profiling_head_config.ad_threshold = ad_treshold;
@@ -141,7 +140,7 @@ void Profiling::decodeScan(base::samples::LaserScan& scan)
     scan.time = base::Time::now();
     scan.start_angle = base::Angle::fromRad(-((double)data.right_limit/6399.0*2.0*M_PI)+M_PI).getRad();
     scan.angular_resolution = ((double)data.motor_step_angle_size)/6399.0*2.0*M_PI;
-    scan.minRange = base::samples::MAX_RANGE_ERROR + 1;
+    scan.minRange = 300; // minimum range of the profiling sonar 0.3m
     if((data.range & 0xC000) == 0)
         scan.maxRange = (data.range & 0x3FFF) * 100;
     else
@@ -150,13 +149,13 @@ void Profiling::decodeScan(base::samples::LaserScan& scan)
     
     if(data.head_control & 0x04){ //Do we scan left or right?
         for(unsigned int i = 0; i < data.data_count; i++){
+                scan.speed *= -1.0;
                 double distance = (data.scan_data[(data.data_count*2-1)-((i*2)+1)] | (data.scan_data[(data.data_count*2-1)-(i*2)]<<8)) * 1e-6 * speed_of_sound / 2.0;//Time in microsecounds to secounds (1e-6) * time of water in speed / twice the way (2.0)
                 scan.ranges.push_back(distance*1000.0); //To millimeters 
         }
     }else{
         for(unsigned int i = 0; i < data.data_count; i++){
-                uint16_t scan_data = data.scan_data[(i*2)] | data.scan_data[(i*2)+1]<<8;
-                double distance = scan_data * 1e-6 * speed_of_sound / 2.0;//Time in microsecounds to secounds (1e-6) * time of water in speed / twice the way (2.0)
+                double distance = (data.scan_data[(i*2)] | data.scan_data[(i*2)+1]<<8) * 1e-6 * speed_of_sound / 2.0;//Time in microsecounds to secounds (1e-6) * time of water in speed / twice the way (2.0)
                 scan.ranges.push_back(distance*1000.0); //To millimeters 
         }
     }
