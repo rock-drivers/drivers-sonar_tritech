@@ -1,30 +1,37 @@
-/**
- * Author: Matthias Goldhoorn (matthias.goldhoorn@dfki.de)
- * Company: Deutsches Forschungszentrum für Künstliche Intelligenz - Robotics Innovation Center (DFKI RIC)
- * Year 2010
- * Desc:
- *
-*/
-#include "Profiling.h"
-#include <stdio.h>
-#include <string.h>
-#include <boost/thread/thread.hpp>
+#include "Profiling.hpp"
+#include "SeaNetTypesInternal.hpp"
 
-#define WRITETIMEOUT 200
+namespace sea_net { 
 
+    enum HeadConfigFlags{
+        ADAPTIVE_GAIN = 1,
+        PRF_ALT = 2,
+        SCANRIGHT = 4,
+        INVERT = 8,
+        MOTOFF = 16,
+        TXOFF = 32,
+        PRF_T10 = 64,
+        CHAN2 = 128,
+        PRF_FIRST = 256,
+        HASMOT = 512,
+        PRF_PINGSYNC = 1024,
+        PRF_SCANSYNC = 2048,
+        STARELLIM = 4096,
+        PRF_MASTER = 8192,
+        PRF_MIRROR = 16384,
+        IGNORESENSOR = 32768
+    };
 
-namespace SeaNet{ namespace Profiling{
-
-Driver::Driver(bool usePTS): Protocol(0x14,0xFF,usePTS) //0x14 means Driver Profiling
+Profiling::Profiling(bool usePTS): Protocol(0x14,0xFF,usePTS) //0x14 means Profiling Profiling
 {
     headDataChanged=false;
 }
 
-Driver::~Driver() {
+Profiling::~Profiling() {
 }
 
 
-void Driver::processHeadData(u8 *message){
+void Profiling::processHeadData(u8 *message){
         base::Time timestamp = base::Time::now();
         uint8_t nodeType = message[12];
         uint16_t packedSize    = message[13] | (message[14]<<8);
@@ -63,7 +70,7 @@ void Driver::processHeadData(u8 *message){
 	}
 }
 
-headControl Driver::getDefaultHeadData(){
+headControl Profiling::getDefaultHeadData(){
 	headControl hc;
 	hc.V3BParams = 0x1D;
 	hc.headCtl = PRF_ALT | CHAN2 |  PRF_FIRST | HASMOT | PRF_MASTER ;
@@ -108,7 +115,7 @@ headControl Driver::getDefaultHeadData(){
 
 }
    
-void Driver::sendHeadData(headControl hc){
+void Profiling::sendHeadData(headControl hc){
 	memcpy(headData,&hc,sizeof(hc));	
 	headDataChanged=true;	
 }

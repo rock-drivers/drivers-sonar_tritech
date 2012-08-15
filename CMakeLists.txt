@@ -1,67 +1,7 @@
+# CMakeLists.txt has to be located in the project folder and cmake has to be
+# executed from 'project/build' with 'cmake ../'.
 cmake_minimum_required(VERSION 2.6)
-
-INCLUDE(FindPkgConfig)
-
-pkg_check_modules(IO REQUIRED "iodrivers_base")
-INCLUDE_DIRECTORIES(${IO_INCLUDE_DIRS})
-LINK_DIRECTORIES(${IO_LIBRARY_DIRS})
-
-find_package(Boost COMPONENTS thread REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-
-ADD_DEFINITIONS(-O0 -Wall)
-
-add_library(seanet SHARED
-	SeaNet.cpp
-	Micron.cpp
-	Profiling.cpp
-	SonarScan.cpp
-	MicronConfiguration.cpp
-)
-
-add_executable(micronTest
-	SeaNet.cpp
-	Micron.cpp
-	SonarScan.cpp
-	Profiling.cpp
-	MicronConfiguration.cpp
-	main.cpp
-)
-
-add_executable(profilingTest
-	SeaNet.cpp
-	Micron.cpp
-	SonarScan.cpp
-	Profiling.cpp
-	MicronConfiguration.cpp
-	main-profiling.cpp
-)
-
-TARGET_LINK_LIBRARIES(seanet
-	${IO_LIBRARIES}
-	${Boost_LIBRARIES}
-)
-
-TARGET_LINK_LIBRARIES(micronTest
-	${IO_LIBRARIES}
-	${Boost_LIBRARIES}
-)
-
-TARGET_LINK_LIBRARIES(profilingTest
-	${IO_LIBRARIES}
-	${Boost_LIBRARIES}
-)
-
-
-INSTALL(TARGETS seanet 
-	LIBRARY DESTINATION lib
-)
-
-INSTALL(FILES SonarScan.h MicronConfiguration.h SeaNet.h Micron.h Profiling.h DESTINATION include)
-
-CONFIGURE_FILE(seanet.pc.in seanet.pc @ONLY)
-
-INSTALL(FILES 
-	${CMAKE_BINARY_DIR}/seanet.pc 
-	DESTINATION lib/pkgconfig
-)
+include($ENV{ROCK_CMAKE_MACROS}/Rock.cmake)
+rock_init(sonar_tritech 0.1)
+add_definitions(-g)
+rock_standard_layout()

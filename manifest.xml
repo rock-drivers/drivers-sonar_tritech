@@ -1,16 +1,10 @@
 <package>
-    <description brief="Tritech Micron Driver">
-        Long description of the sonar protocoll is availible on the SonarCDs
-    </description>
-  <author>Matthias Goldhoorn/matthias.goldhoorn@dfki.de</author>
+  <description brief="driver for micron dst and profiling sonar from tritech">
+  </description>
+  <author></author>
   <license></license>
-  <url>http://spacegit.dfki.uni-bremen.de/dfki-drivers/micron</url>
+  <url>http://</url>
   <logo>http://</logo>
-  <versioncontrol type="git" url="git@spacegit.dfki.uni-bremen.de:dfki-drivers/micron.git" />
-  <export>
-    <cpp cflags="" lflags="" />
-  </export>
-  <depend package="drivers/iodrivers_base" />
-  <depend package="base/types" />
+  <depend package="drivers/iodrivers_base"/>
+  <depend package="base/types"/>
 </package>
-
