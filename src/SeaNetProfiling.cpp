@@ -1,6 +1,7 @@
 #include "SeaNetProfiling.hpp"
 #include "SeaNetTypesInternal.hpp"
 #include <base/logging.h>
+#include <cmath>
 
 namespace sea_net { 
 
@@ -63,6 +64,15 @@ void Profiling::configure(const ProfilingConfig& config, uint32_t timeout)
         config.filt_gain < 0.0 || config.filt_gain > 1.0 || config.select_channel < 1 || config.select_channel > 2 || config.max_distance > 16383.0 || config.max_distance < 0.0)
     {
         throw std::runtime_error("Profiling::Profiling: invalid configuration.");
+    }
+    double opening_angle = 0.0;
+    if(config.left_limit.rad < 0.0 && config.right_limit.rad >= 0.0)
+        opening_angle = config.left_limit.rad - (config.right_limit.rad - 2*M_PI);
+    else
+        opening_angle = config.left_limit.rad - config.right_limit.rad;
+    if(std::ceil(opening_angle / config.angular_resolution.rad) > (SEA_NET_MAX_PACKET_SIZE - 51) / 2.0)
+    {
+        throw std::runtime_error("Profiling::Profiling: invalid configuration. To many samples per message. Decrease the opening angle or increase the angular resolution.");
     }
 
     speed_of_sound = config.speed_of_sound;
