@@ -49,7 +49,9 @@ void Profiling::configure(const ProfilingConfig& config, uint32_t timeout)
     uint16_t pulse_length = (config.max_distance + 10) * 25 / 10;
     uint16_t range_scale = (uint16_t)(config.max_distance * 10.0) & 0x3FFF;
     uint16_t lockout_time = 542 - ((config.frequency_chan1 - 600000) / 600000) * 271;
-    uint16_t head_control = PRF_ALT | PRF_FIRST | HASMOT | PRF_MASTER;
+    uint16_t head_control = PRF_FIRST | HASMOT | PRF_MASTER;
+    if(!config.continous)
+        head_control = head_control | PRF_ALT;
     if(config.select_channel == 2)
         head_control = head_control | CHAN2;
     

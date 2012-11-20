@@ -51,6 +51,8 @@ namespace sea_net
         double gain;
         double filt_gain;
         
+        bool continous;
+        
         ProfilingConfig() : 
             left_limit(base::Angle::fromRad(M_PI)),
             right_limit(base::Angle::fromRad(-M_PI)),
@@ -62,7 +64,8 @@ namespace sea_net
             min_distance(1.0),
             speed_of_sound(1500.0),
             gain(0.2),
-            filt_gain(0.01)
+            filt_gain(0.01),
+            continous(false)
         {};
       
         bool operator==(const ProfilingConfig &other) const
