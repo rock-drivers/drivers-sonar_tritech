@@ -29,7 +29,7 @@ void Micron::decodeSonarBeam(base::samples::SonarBeam &sonar_beam)
     if(sea_net_packet.getSenderType() != IMAGINGSONAR)
         throw std::runtime_error("Micron::getSonarBeam: Wrong device type");
 
-    HeadData data;
+    ImagingHeadData data;
     sea_net_packet.decodeHeadData(data);
 
     //check if the configuration is ok
