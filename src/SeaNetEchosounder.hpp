@@ -16,7 +16,6 @@ public:
          *
          * Throws UnixError on error */
         void openSerial(std::string const& port, int baudrate=115200);
-        void close();
 
         /** Reads one packat from the input buffer and returns its type.
          *  Use getAuxData, getVersion ... depending on the returned type
