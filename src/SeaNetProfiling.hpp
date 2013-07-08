@@ -4,6 +4,12 @@
 #include "SeaNet.hpp"
 #include <base/samples/laser_scan.h>
 
+namespace aggregator
+{
+    class TimestampEstimator;
+};
+
+
 namespace sea_net
 {
     struct ProfilingHeadCommand
@@ -36,6 +42,7 @@ namespace sea_net
         void configure(const ProfilingConfig &config, uint32_t timeout);
         void decodeScan(base::samples::LaserScan &scan);
     private:
+        aggregator::TimestampEstimator* timestamp_estimator;
         ProfilingHeadCommand profiling_head_config;
         double speed_of_sound;
     };

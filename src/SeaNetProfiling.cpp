@@ -2,6 +2,7 @@
 #include "SeaNetTypesInternal.hpp"
 #include <base/logging.h>
 #include <cmath>
+#include <aggregator/TimestampEstimator.hpp>
 
 namespace sea_net { 
 
@@ -26,10 +27,12 @@ enum HeadConfigFlags{
 
 Profiling::Profiling() : SeaNet(PROFILINGSONAR)
 {
+    timestamp_estimator = new aggregator::TimestampEstimator(base::Time::fromSeconds(2),base::Time::fromSeconds(0),INT_MAX);
 }
 
 Profiling::~Profiling() 
 {
+    delete timestamp_estimator;
 }
 
 void Profiling::configure(const ProfilingConfig& config, uint32_t timeout)
@@ -149,7 +152,8 @@ void Profiling::decodeScan(base::samples::LaserScan& scan)
     }*/
 
     //copy data into LaserScan
-    scan.time = base::Time::now();
+    base::Time bak = scan.time;
+    scan.time = timestamp_estimator->update(base::Time::now());//base::Time::now();
     scan.start_angle = base::Angle::fromRad(-((double)data.right_limit/6399.0*2.0*M_PI)+M_PI).getRad();
     scan.angular_resolution = ((double)data.motor_step_angle_size)/6399.0*2.0*M_PI;
     scan.minRange = 300; // minimum range of the profiling sonar 0.3m
@@ -157,8 +161,7 @@ void Profiling::decodeScan(base::samples::LaserScan& scan)
         scan.maxRange = (data.range & 0x3FFF) * 100;
     else
         scan.maxRange = 100000; //Hardcoded 100meter
-    scan.speed = (data.data_count * scan.angular_resolution) / ((double)data.scan_time / 10000.0);
-    
+    scan.speed = (data.data_count * scan.angular_resolution) / (scan.time-bak).toSeconds();// data.scan_time.toSeconds();
     if(data.head_control & 0x04){ //Do we scan left or right?
         for(unsigned int i = 0; i < data.data_count; i++){
                 scan.speed *= -1.0;

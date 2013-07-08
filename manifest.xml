@@ -7,4 +7,5 @@
   <logo>http://</logo>
   <depend package="drivers/iodrivers_base"/>
   <depend package="base/types"/>
+  <depend package="drivers/aggregator"/>
 </package>
