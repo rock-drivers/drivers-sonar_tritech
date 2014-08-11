@@ -71,12 +71,17 @@ void SeaNet::waitForPacket(PacketType type,int timeout)
 
 bool SeaNet::isFullDublex(int timeout)
 {
+    return isFullDuplex(timeout);
+}
+
+bool SeaNet::isFullDuplex(int timeout)
+{
     std::vector<uint8_t> packet = SeaNetPacket::createPaket(device_type,mtSendBBUser);
     writePacket(&packet[0],packet.size());
     waitForPacket(mtBBUserData,timeout);
     BBUserData settings;
     sea_net_packet.decodeBBUserData(settings);
-    return settings.full_dublex;
+    return settings.full_duplex;
 }
 
 SeaNetPacket* SeaNet::getSeaNetPacket()

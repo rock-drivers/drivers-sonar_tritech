@@ -344,5 +344,5 @@ void SeaNetPacket::decodeBBUserData(BBUserData &data)
 {
     if(getPacketType() != mtBBUserData)
         throw std::runtime_error("SeaNet: Wrong packet is stored in the buffer!");
-    data.full_dublex = !packet[146];
+    data.full_duplex = !packet[146];
 }

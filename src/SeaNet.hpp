@@ -50,6 +50,12 @@ public:
          *  call this function if readPacket returns mtVersionData */  
         void getVersion(VersionData &version, int timeout);
 
+        /** Returns if the remote device is configured as full duplex or half
+         * duplex
+         */
+        bool isFullDuplex(int timeout);
+
+        /** @deprecated use isFullDuplex instead */
         bool isFullDublex(int timeout);
         
         void setWriteTimeout(uint32_t timeout);

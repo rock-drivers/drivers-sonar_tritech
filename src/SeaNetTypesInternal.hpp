@@ -97,9 +97,9 @@ namespace sea_net
 
     struct BBUserData
     {
-        bool full_dublex;
+        bool full_duplex;
         BBUserData():
-            full_dublex(0){};
+            full_duplex(0){};
     };
 
     class SeaNetPacket
