@@ -51,21 +51,7 @@ public:
         void getVersion(VersionData &version, int timeout);
 
         bool isFullDublex(int timeout);
-
-        ///
-        //decode functions 
-        //
-        /** gives a reference to the raw data read by readPacket */
-        void decodeRawData(const uint8_t* &buffer, size_t &size);
         
-
-        /** extracts the payload from a mtAux package 
-         *
-         *  call this function if readPacket returns mtAuxData */  
-        void decodeAuxData(std::vector<uint8_t> &data);
-
-        void decodeAliveData(AliveData &data);
-
         void setWriteTimeout(uint32_t timeout);
 
 protected:
