@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_CASE(micron)
     sea_net::Micron micron;
 
     //check opening of a wrong port
-    BOOST_CHECK_THROW(micron.openSerial("/dev/ttyUSB1"),std::runtime_error);
+    BOOST_CHECK_THROW(micron.openSerial("/dev/ttyUSB1", 115200),std::runtime_error);
 
     //check opening 
     micron.openSerial("/dev/ttyUSB0",115200);
@@ -24,7 +24,6 @@ BOOST_AUTO_TEST_CASE(micron)
     sea_net::MicronConfig conf;
     base::samples::SonarBeam sonar_beam;
     conf.max_distance = 4;
-    micron.start();
     
     conf.angular_resolution = base::Angle::fromDeg(1.0);
     micron.configure(conf,10000);

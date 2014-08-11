@@ -9,7 +9,7 @@ namespace sea_net {
 class SeaNetPacket;
 class HeadConfigPacket;
 
-class SeaNet : protected ::iodrivers_base::Driver
+class SeaNet : public ::iodrivers_base::Driver
 {
 public:
         /** Base class for RS232 SeaNet devices
@@ -24,21 +24,23 @@ public:
          *
          * Throws UnixError on error */
         void openSerial(std::string const& port, int baudrate=115200);
-        /** Clears the input buffer and triggers the device to send 
-         *  mtHeadData 
-         *
-         * Throws UnixError on error */
-        void start();
-        void stop();
+
+        /** Overloaded from iodrivers_base::Driver */
+        void openURI(std::string const& uri);
 
         /** Reboots the Device and waits for a mtAlive package 
          *  be careful this takes a while and even if you receive mtAlives
          *  the device my be in a state where it does not accept mtHeadCommands */
         void reboot(int timeout);
 
-        /** Reads one packat from the input buffer and returns its type.
-         *  Use getAuxData, getVersion ... depending on the returned type
-         *  to get the content of the package */
+        /** Reads one packat from I/O and returns the packet type
+         *
+         * The packet's content can be retrieved by the SeaNetPacket API on the
+         * value returned by getSeaNetPacket
+         *
+         * @param timeout the timeout in milliseconds
+         * @return the packet type
+         */
         PacketType readPacket(int timeout);
 
         void waitForPacket(PacketType type, int timeout);
@@ -58,16 +60,32 @@ public:
         
         void setWriteTimeout(uint32_t timeout);
 
+        /** Returns the structure holding the last received packet */
+        SeaNetPacket const& getSeaNetPacket() const;
+
+        /** Request the sonar to acquire one beam
+         *
+         * Calling this method will fail until the corresponding data packet has
+         * been received.
+         *
+         * The timeout is the default write timeout
+         */
+        void requestData();
+
+        /** Wait for the beam data requested by requestData to be received
+         *
+         * @param timeout the timeout in milliseconds
+         */
+        void receiveData(int timeout);
+
 protected:
-        void writeSendData(int timeout);
         void writeHeadCommand(HeadCommand &hc, int timeout);
         virtual int extractPacket(uint8_t const* buffer, size_t buffer_size) const;
-        SeaNetPacket* getSeaNetPacket();
 
 protected:
         SeaNetPacket sea_net_packet;
         DeviceType device_type;
-        bool bstart;
+        bool has_pending_data;
 }; };
 #endif
 
