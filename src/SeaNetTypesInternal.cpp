@@ -31,7 +31,7 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
     //this len is the size of the packet from byte 6 onwards
     size_t len;
     size_t hexlen = 0;
-    sscanf((const char*)&buffer[1],"%4X",&hexlen);
+    sscanf((const char*)&buffer[1],"%4lX",&hexlen);
     len = (buffer[5] | (buffer[6]<<8 ));
 
     //check if both lengths are equal (simple check)
@@ -147,7 +147,7 @@ std::vector<uint8_t> SeaNetPacket::createPaket(DeviceType device_type,
     //in the packet size encoded into the package
     //Header
     packet[0] = PACKET_START;
-    sprintf((char*)&packet[1],"%04X",size2);
+    sprintf((char*)&packet[1],"%04lX",size2);
 
     packet[5] = (size2) & 255;
     packet[6] = ((size2)>>8) & 255;
