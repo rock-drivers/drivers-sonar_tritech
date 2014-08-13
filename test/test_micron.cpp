@@ -1,11 +1,7 @@
+#include <boost/test/unit_test.hpp>
+
 #include "../src/SeaNetMicron.hpp"
 
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE "MicronDriver"
-#define BOOST_AUTO_TEST_MAIN
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/unit_test.hpp>
 
 #include <iodrivers_base/Exceptions.hpp>
 #include <iostream>
