@@ -22,12 +22,6 @@ void SeaNet::openSerial(std::string const& port, int baudrate)
     ::iodrivers_base::Driver::openSerial(port,baudrate);
 }
 
-void SeaNet::close()
-{
-    LOG_DEBUG_S <<"closing serial port: " ;
-    Driver::close();
-}
-
 void SeaNet::start()
 {
     clear();

@@ -24,8 +24,6 @@ public:
          *
          * Throws UnixError on error */
         void openSerial(std::string const& port, int baudrate=115200);
-        void close();
-
         /** Clears the input buffer and triggers the device to send 
          *  mtHeadData 
          *
