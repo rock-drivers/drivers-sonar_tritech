@@ -1,10 +1,9 @@
 <package>
   <description brief="driver for micron dst and profiling sonar from tritech">
   </description>
+  <maintainer>Matthias Goldhoorn/matthias.goldhoorn@dfki.de</maintainer>
   <author></author>
-  <license></license>
-  <url>http://</url>
-  <logo>http://</logo>
+  <license>LGPLv2 or later</license>
   <depend package="drivers/iodrivers_base"/>
   <depend package="base/types"/>
   <depend package="drivers/aggregator"/>
