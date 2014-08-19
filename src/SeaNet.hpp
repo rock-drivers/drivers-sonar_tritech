@@ -72,6 +72,15 @@ public:
          */
         void requestData();
 
+        /** Checks whether data has been requested but not received yet
+         *
+         * Some operations (e.g. configure()) cannot be called if it is the
+         * case. For these operations, if you don't know whether data has been
+         * requested, you must check whether hasPendingData() returns true and
+         * call receiveData() first.
+         */
+        bool hasPendingData() const;
+
         /** Wait for the beam data requested by requestData to be received
          *
          * @param timeout the timeout in milliseconds

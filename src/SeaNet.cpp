@@ -138,6 +138,11 @@ void SeaNet::requestData()
     writePacket(&packet[0],packet.size(), getWriteTimeout());
 }
 
+bool SeaNet::hasPendingData() const
+{
+    return has_pending_data;
+}
+
 void SeaNet::receiveData(int timeout)
 {
     LOG_DEBUG_S << "waiting for a mtHeadData packet" ;
