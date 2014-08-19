@@ -31,7 +31,8 @@ BOOST_AUTO_TEST_CASE(micron)
     double start_angle = -99;
     for(int i=0;i<10;++i)
     {
-        micron.waitForPacket(sea_net::mtHeadData,400);
+        micron.requestData();
+        micron.receiveData(1000);
         micron.decodeSonarBeam(sonar_beam);
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
         if(start_angle == -99)
@@ -44,7 +45,8 @@ BOOST_AUTO_TEST_CASE(micron)
     std::cout <<" TEST 360° Degree Modus with 5° Steps" << std::endl;
     for(int i=0;i<10;++i)
     {
-        micron.waitForPacket(sea_net::mtHeadData,200);
+        micron.requestData();
+        micron.receiveData(1000);
         micron.decodeSonarBeam(sonar_beam);
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;
     }
@@ -55,7 +57,8 @@ BOOST_AUTO_TEST_CASE(micron)
     std::cout <<" TEST 360° Degree Modus with 10° Steps" << std::endl;
     for(int i=0;i<10;++i)
     {
-        micron.waitForPacket(sea_net::mtHeadData,400);
+        micron.requestData();
+        micron.receiveData(1000);
         micron.decodeSonarBeam(sonar_beam);
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
     }
@@ -71,7 +74,8 @@ BOOST_AUTO_TEST_CASE(micron)
     std::cout <<" TEST LeftRight +-15° Modus with 5° Steps" << std::endl;
     for(int i=0;i<10;++i)
     {
-        micron.waitForPacket(sea_net::mtHeadData,200);
+        micron.requestData();
+        micron.receiveData(1000);
         micron.decodeSonarBeam(sonar_beam);
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
     }
@@ -85,7 +89,8 @@ BOOST_AUTO_TEST_CASE(micron)
     std::cout <<" TEST LeftRight +15 +30° Modus with 5° Steps" << std::endl;
     for(int i=0;i<10;++i)
     {
-        micron.waitForPacket(sea_net::mtHeadData,200);
+        micron.requestData();
+        micron.receiveData(1000);
         micron.decodeSonarBeam(sonar_beam);
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
     }
@@ -99,7 +104,8 @@ BOOST_AUTO_TEST_CASE(micron)
     std::cout <<" TEST LeftRight -15 -30° Modus with 5° Steps" << std::endl;
     for(int i=0;i<10;++i)
     {
-        micron.waitForPacket(sea_net::mtHeadData,200);
+        micron.requestData();
+        micron.receiveData(1000);
         micron.decodeSonarBeam(sonar_beam);
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
     }
