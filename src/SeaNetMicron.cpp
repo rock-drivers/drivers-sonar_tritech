@@ -132,7 +132,7 @@ void Micron::configure(const MicronConfig &config,uint32_t timeout)
 
     //SCANRIGHT is always 1 for microns dst even if the flag is not set
     head_config.head_control =
-        (((!config.low_resolution)?ADC8ON:0)|(config.continous?CONT:0)|RAW|HASMOT|REPLYASL|CHAN2 );
+        (((!config.low_resolution)?ADC8ON:0)|(config.continous?CONT:0)|RAW|HASMOT|REPLYASL|CHAN2|(config.invert?INVERT:0));
     
     writeHeadCommand(head_config,timeout);
 }

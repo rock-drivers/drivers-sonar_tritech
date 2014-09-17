@@ -105,6 +105,7 @@ namespace sea_net
 
         bool low_resolution;
         bool continous;
+        bool invert;
 
         MicronConfig():
             left_limit(base::Angle::fromRad(M_PI)),
@@ -116,7 +117,8 @@ namespace sea_net
             speed_of_sound(1500.0),
             gain(0.4),
             low_resolution(false),
-            continous(true)
+            continous(true),
+            invert(false)
         {};
 
         bool operator==(const MicronConfig &other) const
@@ -130,7 +132,8 @@ namespace sea_net
                     other.speed_of_sound== speed_of_sound &&
                     other.gain == gain &&
                     other.low_resolution == low_resolution &&
-                    other.continous == continous);
+                    other.continous == continous &&
+                    other.invert == invert);
         };
         bool operator!=(const MicronConfig &other) const
         {
