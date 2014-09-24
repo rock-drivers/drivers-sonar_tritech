@@ -95,8 +95,8 @@ void Micron::configure(const MicronConfig &config,uint32_t timeout)
     uint8_t initial_gain = config.gain*210;
     uint16_t lockout_time = 2.0*config.min_distance/config.speed_of_sound*10e6;
 
-    LOG_INFO_S << "Configure Sonar";
-    LOG_DEBUG_S << "ad_interval:" << ad_interval << " number_of_bins:" << number_of_bins << " left_limit:" << left_limit
+    std::cout << "Configure Sonar";
+    std::cout << "ad_interval:" << ad_interval << " number_of_bins:" << number_of_bins << " left_limit:" << left_limit
                 << " right_limit:" << right_limit << " motor_step_angle_size:" << (int)motor_step_angle_size << " initial_gain:"
                 << " lockout_time:" << lockout_time;
 
@@ -105,6 +105,18 @@ void Micron::configure(const MicronConfig &config,uint32_t timeout)
        config.angular_resolution.rad < 0 || config.angular_resolution.rad / (0.05625/180.0*M_PI) > 255.0 ||
        ad_interval < 0 || ad_interval > 1500 || number_of_bins < 0 || number_of_bins > 1500 )
     {
+        if(config.gain < 0.0 || config.gain > 1.0){
+            throw std::runtime_error("Micron::Micron: invalid Gain configuration.");
+        }
+        if(config.angular_resolution.rad < 0 || config.angular_resolution.rad / (0.05625/180.0*M_PI) > 255.0){
+            throw std::runtime_error("Micron::Micron: Invalid angular rad configuration.");
+        }
+        if(ad_interval < 0 || ad_interval > 1500){
+            throw std::runtime_error("Micron::Micron: Invalid ad_interval configuration.");
+        }
+        if(number_of_bins < 0 || number_of_bins > 1500){
+            throw std::runtime_error("Micron::Micron: Invalid numbers of bins.");
+        }
         throw std::runtime_error("Micron::Micron: invalid configuration.");
     }
 
