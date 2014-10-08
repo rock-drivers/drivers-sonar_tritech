@@ -48,11 +48,11 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
     if(len > buffer_size)
         return 0;               //packet is to small wait for more data
 
+    //DeviceType device_type = (DeviceType) buffer[8];
+    PacketType type = (PacketType) buffer[10];
     //checking for the end of the packet 
     if (buffer[len-1] == PACKET_END) 
     {
-        //DeviceType device_type = (DeviceType) buffer[8];
-        PacketType type = (PacketType) buffer[10];
         LOG_DEBUG_S << "Found packet of type "<< type << " and size "<< len ;
 
         //check packet size
@@ -127,7 +127,7 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
                    << len ;
         return -1;
     }
-    LOG_WARN_S << "Corrupted packet: No Message end was found" ;
+    LOG_WARN_S << "Corrupted packet (possibly type " << type << "): no message end was found, packet size " << len;
     return -1; 
 }
 
