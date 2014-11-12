@@ -2,7 +2,7 @@
 #define _SEANET_TYPES_INTERNAL_H_
 
 #include "SeaNetTypes.hpp"
-#define SEA_NET_MAX_PACKET_SIZE 1545 // mtHeadData is the biggest package 
+#define SEA_NET_MAX_PACKET_SIZE 4096 // mtHeadData is the biggest package 
 
 namespace sea_net
 {
