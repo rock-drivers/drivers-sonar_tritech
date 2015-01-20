@@ -19,6 +19,7 @@ SeaNet::~SeaNet()
 void SeaNet::openSerial(std::string const& port, int baudrate)
 {
     LOG_DEBUG_S <<"opening serial port: "<<  port << " with baudrate: " << baudrate ;
+    has_pending_data = false;
     ::iodrivers_base::Driver::openSerial(port,baudrate);
 }
 
@@ -26,6 +27,12 @@ void SeaNet::openURI(std::string const& uri)
 {
     has_pending_data = false;
     return iodrivers_base::Driver::openURI(uri);
+}
+
+void SeaNet::clear()
+{
+    has_pending_data = false;
+    return iodrivers_base::Driver::clear();
 }
 
 void SeaNet::reboot(int timeout)

@@ -28,6 +28,9 @@ public:
         /** Overloaded from iodrivers_base::Driver */
         void openURI(std::string const& uri);
 
+        /** Overloaded from iodrivers_base::Driver */
+        void clear();
+
         /** Reboots the Device and waits for a mtAlive package 
          *  be careful this takes a while and even if you receive mtAlives
          *  the device my be in a state where it does not accept mtHeadCommands */
