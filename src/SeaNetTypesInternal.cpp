@@ -59,8 +59,7 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
         switch(type)
         {
         case mtHeadCommand:
-            if(len == 82)
-                return len;
+            return len;
             break;
         case mtSendData:
             if(len == 18)
