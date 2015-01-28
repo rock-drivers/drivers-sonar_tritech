@@ -126,12 +126,12 @@ namespace sea_net
 
             void getRawData(const uint8_t * &buffer,size_t &size)const;
 
-            void decodeAliveData(AliveData &data);
-            void decodeHeadData(ImagingHeadData &data);
-            void decodeHeadData(ProfilingHeadData &data);
-            void decodeAuxData(std::vector<uint8_t> &aux_data);
-            void decodeVersionData(VersionData &version);
-            void decodeBBUserData(BBUserData &data);
+            void decodeAliveData(AliveData &data) const;
+            void decodeHeadData(ImagingHeadData &data) const;
+            void decodeHeadData(ProfilingHeadData &data) const;
+            void decodeAuxData(std::vector<uint8_t> &aux_data) const;
+            void decodeVersionData(VersionData &version) const;
+            void decodeBBUserData(BBUserData &data) const;
 
         private:
         //we do not use a std::vector because this would introduce

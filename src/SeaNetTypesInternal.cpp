@@ -238,7 +238,7 @@ void SeaNetPacket::getRawData(const uint8_t * &buffer,size_t &size)const
     size = this->size;
 }
 
-void SeaNetPacket::decodeAliveData(AliveData &data)
+void SeaNetPacket::decodeAliveData(AliveData &data) const
 {
     if(getPacketType() != mtAlive)
         throw std::runtime_error("Cannot decode AliveData. Wrong packet type is buffered.");
@@ -251,7 +251,7 @@ void SeaNetPacket::decodeAliveData(AliveData &data)
     data.config_send = packet[20]&128;
 }
 
-void SeaNetPacket::decodeHeadData(ImagingHeadData &data)
+void SeaNetPacket::decodeHeadData(ImagingHeadData &data) const
 {
     if(getPacketType() != mtHeadData)
         throw std::runtime_error("Cannot decode mtHeadData. Wrong packet type is buffered.");
@@ -283,7 +283,7 @@ void SeaNetPacket::decodeHeadData(ImagingHeadData &data)
     data.scan_data      = &packet[44];
 }
 
-void SeaNetPacket::decodeHeadData(ProfilingHeadData& data)
+void SeaNetPacket::decodeHeadData(ProfilingHeadData& data) const
 {
     if(getPacketType() != mtHeadData)
         throw std::runtime_error("Cannot decode mtHeadData. Wrong packet type is buffered.");
@@ -313,7 +313,7 @@ void SeaNetPacket::decodeHeadData(ProfilingHeadData& data)
     data.scan_data      = &packet[40];
 }
 
-void SeaNetPacket::decodeAuxData(std::vector<uint8_t> &aux_data)
+void SeaNetPacket::decodeAuxData(std::vector<uint8_t> &aux_data) const
 {
     if(getPacketType() != mtAuxData)
         throw std::runtime_error("SeaNet: Wrong packet is stored in the buffer!");
@@ -326,7 +326,7 @@ void SeaNetPacket::decodeAuxData(std::vector<uint8_t> &aux_data)
     memcpy(&aux_data[0],&packet[15],aux_size);
 }
 
-void SeaNetPacket::decodeVersionData(VersionData &version)
+void SeaNetPacket::decodeVersionData(VersionData &version) const
 {
     if(getPacketType() != mtVersionData)
         throw std::runtime_error("SeaNet: Wrong packet is stored in the buffer!");
@@ -339,7 +339,7 @@ void SeaNetPacket::decodeVersionData(VersionData &version)
     version.nodeID = packet[23];
 }
 
-void SeaNetPacket::decodeBBUserData(BBUserData &data)
+void SeaNetPacket::decodeBBUserData(BBUserData &data) const
 {
     if(getPacketType() != mtBBUserData)
         throw std::runtime_error("SeaNet: Wrong packet is stored in the buffer!");
