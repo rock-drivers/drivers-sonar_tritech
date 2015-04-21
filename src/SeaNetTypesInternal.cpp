@@ -19,8 +19,8 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
     //Packets starts with a @, so search for it and
     //discard all data before
     size_t readPos=0;
-    while (buffer[readPos] != PACKET_START && readPos < buffer_size) {
-        readPos++;
+    while (readPos != buffer_size && buffer[readPos] != PACKET_START) {
+        ++readPos;
     }
     if(readPos>0){
         LOG_WARN_S << "Corrupted packet: Skipping " << readPos << " bytes because no start was found.";
