@@ -67,21 +67,13 @@ int main(int argc, char** argv)
     driver.openSerial(argv[1],baudrate);
     base::samples::RigidBodyState rbs;
     driver.configure(config,1000);
-    driver.start();
-    sea_net::PacketType packet_type = sea_net::mtNull;
     base::samples::SonarBeam sonar_beam;
-    while(1){
-        packet_type = driver.readPacket(1000);
-        switch(packet_type){
-        case sea_net::mtHeadData:
-            {
-                 driver.decodeSonarBeam(sonar_beam);
-                 udp.sendSonarBeam(sonar_beam);
-                 break;
-            }
-        default:
-            break;
-        }
+    driver.requestData();
+    while(1) {
+        driver.receiveData(1000);
+        driver.requestData();
+        driver.decodeSonarBeam(sonar_beam);
+        udp.sendSonarBeam(sonar_beam);
     }
     return 0;
 }

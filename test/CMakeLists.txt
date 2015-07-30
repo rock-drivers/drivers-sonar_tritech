@@ -1,3 +1,4 @@
-add_definitions(-g)
-rock_testsuite(test_detector DEPS sonar_tritech SOURCES test_micron.cpp)
+rock_testsuite(test_detector
+    DEPS sonar_tritech
+    SOURCES suite.cpp test_micron.cpp)
 

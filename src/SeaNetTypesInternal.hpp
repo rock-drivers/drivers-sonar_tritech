@@ -2,7 +2,7 @@
 #define _SEANET_TYPES_INTERNAL_H_
 
 #include "SeaNetTypes.hpp"
-#define SEA_NET_MAX_PACKET_SIZE 1545 // mtHeadData is the biggest package 
+#define SEA_NET_MAX_PACKET_SIZE 4096 // mtHeadData is the biggest package 
 
 namespace sea_net
 {
@@ -97,9 +97,9 @@ namespace sea_net
 
     struct BBUserData
     {
-        bool full_dublex;
+        bool full_duplex;
         BBUserData():
-            full_dublex(0){};
+            full_duplex(0){};
     };
 
     class SeaNetPacket
@@ -126,12 +126,12 @@ namespace sea_net
 
             void getRawData(const uint8_t * &buffer,size_t &size)const;
 
-            void decodeAliveData(AliveData &data);
-            void decodeHeadData(ImagingHeadData &data);
-            void decodeHeadData(ProfilingHeadData &data);
-            void decodeAuxData(std::vector<uint8_t> &aux_data);
-            void decodeVersionData(VersionData &version);
-            void decodeBBUserData(BBUserData &data);
+            void decodeAliveData(AliveData &data) const;
+            void decodeHeadData(ImagingHeadData &data) const;
+            void decodeHeadData(ProfilingHeadData &data) const;
+            void decodeAuxData(std::vector<uint8_t> &aux_data) const;
+            void decodeVersionData(VersionData &version) const;
+            void decodeBBUserData(BBUserData &data) const;
 
         private:
         //we do not use a std::vector because this would introduce

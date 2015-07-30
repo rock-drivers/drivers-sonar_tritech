@@ -1,11 +1,7 @@
+#include <boost/test/unit_test.hpp>
+
 #include "../src/SeaNetMicron.hpp"
 
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE "MicronDriver"
-#define BOOST_AUTO_TEST_MAIN
-#include <boost/test/auto_unit_test.hpp>
-#include <boost/test/unit_test.hpp>
 
 #include <iodrivers_base/Exceptions.hpp>
 #include <iostream>
@@ -16,7 +12,7 @@ BOOST_AUTO_TEST_CASE(micron)
     sea_net::Micron micron;
 
     //check opening of a wrong port
-    BOOST_CHECK_THROW(micron.openSerial("/dev/ttyUSB1"),std::runtime_error);
+    BOOST_CHECK_THROW(micron.openSerial("/dev/ttyUSB1", 115200),std::runtime_error);
 
     //check opening 
     micron.openSerial("/dev/ttyUSB0",115200);
@@ -28,7 +24,6 @@ BOOST_AUTO_TEST_CASE(micron)
     sea_net::MicronConfig conf;
     base::samples::SonarBeam sonar_beam;
     conf.max_distance = 4;
-    micron.start();
     
     conf.angular_resolution = base::Angle::fromDeg(1.0);
     micron.configure(conf,10000);
@@ -36,7 +31,8 @@ BOOST_AUTO_TEST_CASE(micron)
     double start_angle = -99;
     for(int i=0;i<10;++i)
     {
-        micron.waitForPacket(sea_net::mtHeadData,400);
+        micron.requestData();
+        micron.receiveData(1000);
         micron.decodeSonarBeam(sonar_beam);
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
         if(start_angle == -99)
@@ -49,7 +45,8 @@ BOOST_AUTO_TEST_CASE(micron)
     std::cout <<" TEST 360° Degree Modus with 5° Steps" << std::endl;
     for(int i=0;i<10;++i)
     {
-        micron.waitForPacket(sea_net::mtHeadData,200);
+        micron.requestData();
+        micron.receiveData(1000);
         micron.decodeSonarBeam(sonar_beam);
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;
     }
@@ -60,7 +57,8 @@ BOOST_AUTO_TEST_CASE(micron)
     std::cout <<" TEST 360° Degree Modus with 10° Steps" << std::endl;
     for(int i=0;i<10;++i)
     {
-        micron.waitForPacket(sea_net::mtHeadData,400);
+        micron.requestData();
+        micron.receiveData(1000);
         micron.decodeSonarBeam(sonar_beam);
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
     }
@@ -76,7 +74,8 @@ BOOST_AUTO_TEST_CASE(micron)
     std::cout <<" TEST LeftRight +-15° Modus with 5° Steps" << std::endl;
     for(int i=0;i<10;++i)
     {
-        micron.waitForPacket(sea_net::mtHeadData,200);
+        micron.requestData();
+        micron.receiveData(1000);
         micron.decodeSonarBeam(sonar_beam);
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
     }
@@ -90,7 +89,8 @@ BOOST_AUTO_TEST_CASE(micron)
     std::cout <<" TEST LeftRight +15 +30° Modus with 5° Steps" << std::endl;
     for(int i=0;i<10;++i)
     {
-        micron.waitForPacket(sea_net::mtHeadData,200);
+        micron.requestData();
+        micron.receiveData(1000);
         micron.decodeSonarBeam(sonar_beam);
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
     }
@@ -104,7 +104,8 @@ BOOST_AUTO_TEST_CASE(micron)
     std::cout <<" TEST LeftRight -15 -30° Modus with 5° Steps" << std::endl;
     for(int i=0;i<10;++i)
     {
-        micron.waitForPacket(sea_net::mtHeadData,200);
+        micron.requestData();
+        micron.receiveData(1000);
         micron.decodeSonarBeam(sonar_beam);
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
     }

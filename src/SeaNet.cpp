@@ -8,7 +8,7 @@ namespace sea_net{
 
 SeaNet::SeaNet(DeviceType type): 
   iodrivers_base::Driver(SEA_NET_MAX_PACKET_SIZE,false),
-  device_type(type),bstart(false)
+  device_type(type),has_pending_data(false)
 {
 }
 
@@ -19,26 +19,20 @@ SeaNet::~SeaNet()
 void SeaNet::openSerial(std::string const& port, int baudrate)
 {
     LOG_DEBUG_S <<"opening serial port: "<<  port << " with baudrate: " << baudrate ;
+    has_pending_data = false;
     ::iodrivers_base::Driver::openSerial(port,baudrate);
 }
 
-void SeaNet::close()
+void SeaNet::openURI(std::string const& uri)
 {
-    LOG_DEBUG_S <<"closing serial port: " ;
-    Driver::close();
+    has_pending_data = false;
+    return iodrivers_base::Driver::openURI(uri);
 }
 
-void SeaNet::start()
+void SeaNet::clear()
 {
-    clear();
-    bstart = true;
-    writeSendData(WRITE_TIMEOUT);
-    //TODO check if configure was called before
-}
-
-void SeaNet::stop()
-{
-    bstart = false;
+    has_pending_data = false;
+    return iodrivers_base::Driver::clear();
 }
 
 void SeaNet::reboot(int timeout)
@@ -71,74 +65,59 @@ void SeaNet::waitForPacket(PacketType type,int timeout)
 
 bool SeaNet::isFullDublex(int timeout)
 {
+    return isFullDuplex(timeout);
+}
+
+bool SeaNet::isFullDuplex(int timeout)
+{
     std::vector<uint8_t> packet = SeaNetPacket::createPaket(device_type,mtSendBBUser);
     writePacket(&packet[0],packet.size());
     waitForPacket(mtBBUserData,timeout);
     BBUserData settings;
     sea_net_packet.decodeBBUserData(settings);
-    return settings.full_dublex;
+    return settings.full_duplex;
 }
 
-SeaNetPacket* SeaNet::getSeaNetPacket()
+SeaNetPacket const& SeaNet::getSeaNetPacket() const
 {
-    return &sea_net_packet;
+    return sea_net_packet;
 }
 
 sea_net::PacketType SeaNet::readPacket(int timeout)
 {
-    iodrivers_base::Timeout time_out(timeout);
-    while(!time_out.elapsed())
-    {
-        uint8_t* buffer = sea_net_packet.getPacketPtr();
-        size_t size = iodrivers_base::Driver::readPacket(buffer,SEA_NET_MAX_PACKET_SIZE,time_out.timeLeft());
-        sea_net_packet.setSize(size);
-        if(!sea_net_packet.validate())
-            throw std::runtime_error("extractPacket has extracted an invalid package!");  //this should never happen
-        
-        //trigger head again to get the next beam
-        PacketType type = sea_net_packet.getPacketType();
-        switch(type)
-        {
-            case mtHeadData:
-                if(bstart)
-                    writeSendData(time_out.timeLeft());
-                break;
-            case mtAlive:
-                break;
-            default:
-                break;
-        }
-        
-        LOG_DEBUG_S << "read packet of type: "<< type ;
-        return type;
-    }
-    return mtNull;
+    uint8_t* buffer = sea_net_packet.getPacketPtr();
+    size_t size = iodrivers_base::Driver::readPacket(
+            buffer,
+            SEA_NET_MAX_PACKET_SIZE,
+            base::Time::fromMilliseconds(timeout));
+    sea_net_packet.setSize(size);
+    if(!sea_net_packet.validate())
+        throw std::runtime_error("extractPacket has extracted an invalid package!");  //this should never happen
+    LOG_DEBUG_S << "read packet of type: "<< sea_net_packet.getPacketType() ;
+    if (sea_net_packet.getPacketType() == mtHeadData)
+        has_pending_data = false;
+
+    return sea_net_packet.getPacketType();
 }
 
 void SeaNet::writeHeadCommand(HeadCommand &head_config, int timeout)
 {
-    AliveData alive_data;
-    bool received_alive = false;
-    bool was_started = bstart;
+    if (has_pending_data)
+        throw std::runtime_error("requestData() called and the corresponding receiveData() has not been called");
 
     iodrivers_base::Timeout time_out(timeout);
-    std::vector<uint8_t> packet = SeaNetPacket::createPaket(device_type,
-                                                           mtHeadCommand,
-                                                           (uint8_t*)&head_config,
-                                                            sizeof(head_config));
-    stop();
-    //we have to wait until the device is no longer sending HeadData
-    try
-    {
-        while(true) waitForPacket(mtHeadData,300); 
-    }
-    catch(std::runtime_error e)
-    {}
+    std::vector<uint8_t> packet =
+        SeaNetPacket::createPaket(device_type,
+                mtHeadCommand,
+                (uint8_t*)&head_config,
+                sizeof(head_config));
 
     LOG_DEBUG_S <<"Sent mtHeadCommand packet" ;
-    writePacket(&packet[0],packet.size());
+    writePacket(&packet[0],packet.size(),time_out.timeLeft());
 
     //wait for an alive packet to check if the sonar is configured
+    AliveData alive_data;
+    bool received_alive = false;
     while(!alive_data.ready && alive_data.no_config && !alive_data.config_send)
     {
         try
@@ -156,34 +135,25 @@ void SeaNet::writeHeadCommand(HeadCommand &head_config, int timeout)
         received_alive = true;
         sea_net_packet.decodeAliveData(alive_data);
     }
-    if(was_started)
-    {
-        start();
-        PacketType packet_type = mtNull;
-        while(packet_type != sea_net::mtHeadData)
-        {
-            packet_type = readPacket(time_out.timeLeft());
-            switch(packet_type)
-            {
-            case sea_net::mtAlive:
-                //send start packet again 
-                //this is necessary because 
-                //the sonar is not accepting mtSendData
-                //after configuration for some milliseconds 
-                writeSendData(time_out.timeLeft());             
-                break;
-            default:
-                break;
-            }
-        }
-    }
 }
 
-void SeaNet::writeSendData(int timeout) 
+void SeaNet::requestData() 
 {
     LOG_DEBUG_S << "write mtSendData packet" ;
+    has_pending_data = true;
     std::vector<uint8_t> packet = SeaNetPacket::createSendDataPaket(device_type);
-    writePacket(&packet[0],packet.size());
+    writePacket(&packet[0],packet.size(), getWriteTimeout());
+}
+
+bool SeaNet::hasPendingData() const
+{
+    return has_pending_data;
+}
+
+void SeaNet::receiveData(int timeout)
+{
+    LOG_DEBUG_S << "waiting for a mtHeadData packet" ;
+    waitForPacket(mtHeadData, timeout);
 }
 
 int SeaNet::extractPacket(uint8_t const* buffer, size_t buffer_size) const
@@ -196,6 +166,5 @@ void SeaNet::setWriteTimeout(uint32_t timeout)
 {
     Driver::setWriteTimeout(base::Time::fromMicroseconds(timeout*1000));
 }
-
 
 }

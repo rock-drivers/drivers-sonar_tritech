@@ -31,7 +31,7 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
     //this len is the size of the packet from byte 6 onwards
     size_t len;
     size_t hexlen = 0;
-    sscanf((const char*)&buffer[1],"%4X",&hexlen);
+    sscanf((const char*)&buffer[1],"%4lX",&hexlen);
     len = (buffer[5] | (buffer[6]<<8 ));
 
     //check if both lengths are equal (simple check)
@@ -48,19 +48,18 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
     if(len > buffer_size)
         return 0;               //packet is to small wait for more data
 
+    //DeviceType device_type = (DeviceType) buffer[8];
+    PacketType type = (PacketType) buffer[10];
     //checking for the end of the packet 
     if (buffer[len-1] == PACKET_END) 
     {
-        //DeviceType device_type = (DeviceType) buffer[8];
-        PacketType type = (PacketType) buffer[10];
         LOG_DEBUG_S << "Found packet of type "<< type << " and size "<< len ;
 
         //check packet size
         switch(type)
         {
         case mtHeadCommand:
-            if(len == 82)
-                return len;
+            return len;
             break;
         case mtSendData:
             if(len == 18)
@@ -127,7 +126,7 @@ int SeaNetPacket::isValidPacket(uint8_t const *buffer, size_t buffer_size)
                    << len ;
         return -1;
     }
-    LOG_WARN_S << "Corrupted packet: No Message end was found" ;
+    LOG_WARN_S << "Corrupted packet (possibly type " << type << "): no message end was found, packet size " << len;
     return -1; 
 }
 
@@ -147,7 +146,7 @@ std::vector<uint8_t> SeaNetPacket::createPaket(DeviceType device_type,
     //in the packet size encoded into the package
     //Header
     packet[0] = PACKET_START;
-    sprintf((char*)&packet[1],"%04X",size2);
+    sprintf((char*)&packet[1],"%04lX",size2);
 
     packet[5] = (size2) & 255;
     packet[6] = ((size2)>>8) & 255;
@@ -239,7 +238,7 @@ void SeaNetPacket::getRawData(const uint8_t * &buffer,size_t &size)const
     size = this->size;
 }
 
-void SeaNetPacket::decodeAliveData(AliveData &data)
+void SeaNetPacket::decodeAliveData(AliveData &data) const
 {
     if(getPacketType() != mtAlive)
         throw std::runtime_error("Cannot decode AliveData. Wrong packet type is buffered.");
@@ -252,7 +251,7 @@ void SeaNetPacket::decodeAliveData(AliveData &data)
     data.config_send = packet[20]&128;
 }
 
-void SeaNetPacket::decodeHeadData(ImagingHeadData &data)
+void SeaNetPacket::decodeHeadData(ImagingHeadData &data) const
 {
     if(getPacketType() != mtHeadData)
         throw std::runtime_error("Cannot decode mtHeadData. Wrong packet type is buffered.");
@@ -284,7 +283,7 @@ void SeaNetPacket::decodeHeadData(ImagingHeadData &data)
     data.scan_data      = &packet[44];
 }
 
-void SeaNetPacket::decodeHeadData(ProfilingHeadData& data)
+void SeaNetPacket::decodeHeadData(ProfilingHeadData& data) const
 {
     if(getPacketType() != mtHeadData)
         throw std::runtime_error("Cannot decode mtHeadData. Wrong packet type is buffered.");
@@ -314,7 +313,7 @@ void SeaNetPacket::decodeHeadData(ProfilingHeadData& data)
     data.scan_data      = &packet[40];
 }
 
-void SeaNetPacket::decodeAuxData(std::vector<uint8_t> &aux_data)
+void SeaNetPacket::decodeAuxData(std::vector<uint8_t> &aux_data) const
 {
     if(getPacketType() != mtAuxData)
         throw std::runtime_error("SeaNet: Wrong packet is stored in the buffer!");
@@ -327,7 +326,7 @@ void SeaNetPacket::decodeAuxData(std::vector<uint8_t> &aux_data)
     memcpy(&aux_data[0],&packet[15],aux_size);
 }
 
-void SeaNetPacket::decodeVersionData(VersionData &version)
+void SeaNetPacket::decodeVersionData(VersionData &version) const
 {
     if(getPacketType() != mtVersionData)
         throw std::runtime_error("SeaNet: Wrong packet is stored in the buffer!");
@@ -340,9 +339,9 @@ void SeaNetPacket::decodeVersionData(VersionData &version)
     version.nodeID = packet[23];
 }
 
-void SeaNetPacket::decodeBBUserData(BBUserData &data)
+void SeaNetPacket::decodeBBUserData(BBUserData &data) const
 {
     if(getPacketType() != mtBBUserData)
         throw std::runtime_error("SeaNet: Wrong packet is stored in the buffer!");
-    data.full_dublex = !packet[146];
+    data.full_duplex = !packet[146];
 }
