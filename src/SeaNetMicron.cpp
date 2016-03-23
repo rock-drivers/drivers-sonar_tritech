@@ -134,7 +134,6 @@ void Micron::configure(const MicronConfig &config,uint32_t timeout)
     //generate head data
     head_config.V3B_params = 0x1D;
     head_config.head_type = IMAGINGSONAR;
-    head_config.range_scale  = 40;
     head_config.left_limit   =left_limit; 
     head_config.right_limit  =right_limit;
     head_config.ad_span = 81;
@@ -150,6 +149,14 @@ void Micron::configure(const MicronConfig &config,uint32_t timeout)
     head_config.minor_axis_dir = (0x40) | (0x06<<8);
     head_config.major_axis_pan = (0x01);
     head_config.lockout_time = lockout_time; 
+    // Range scale does not control the sonar, only provides a way to note the current settings in a human readable
+    // format. The lower 14 bits are the range scale * 10 units and the higher 2 bits are coded units:
+    // 0: meters
+    // 1: feet
+    // 2: fathoms
+    // 3: yards
+    // Only the metric system is implemented for now.
+    head_config.range_scale  = floor(config.max_distance * 10);
 
     //SCANRIGHT is always 1 for microns dst even if the flag is not set
     head_config.head_control =
