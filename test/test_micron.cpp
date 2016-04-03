@@ -23,6 +23,7 @@ BOOST_AUTO_TEST_CASE(micron)
     //check reconfigure with a too small timeout 
     sea_net::MicronConfig conf;
     base::samples::SonarBeam sonar_beam;
+    base::samples::Sonar sonar;
     conf.max_distance = 4;
     
     conf.angular_resolution = base::Angle::fromDeg(1.0);
@@ -33,7 +34,9 @@ BOOST_AUTO_TEST_CASE(micron)
     {
         micron.requestData();
         micron.receiveData(1000);
-        micron.decodeSonarBeam(sonar_beam);
+        micron.decodeSonar(sonar);
+        sonar_beam = sonar.toSonarBeam();
+
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
         if(start_angle == -99)
             start_angle = sonar_beam.bearing.rad;
@@ -47,7 +50,8 @@ BOOST_AUTO_TEST_CASE(micron)
     {
         micron.requestData();
         micron.receiveData(1000);
-        micron.decodeSonarBeam(sonar_beam);
+        micron.decodeSonar(sonar);
+        sonar_beam = sonar.toSonarBeam();
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;
     }
     std::cout << std::endl;
@@ -59,7 +63,8 @@ BOOST_AUTO_TEST_CASE(micron)
     {
         micron.requestData();
         micron.receiveData(1000);
-        micron.decodeSonarBeam(sonar_beam);
+        micron.decodeSonar(sonar);
+        sonar_beam = sonar.toSonarBeam();
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
     }
     std::cout << std::endl;
@@ -76,7 +81,8 @@ BOOST_AUTO_TEST_CASE(micron)
     {
         micron.requestData();
         micron.receiveData(1000);
-        micron.decodeSonarBeam(sonar_beam);
+        micron.decodeSonar(sonar);
+        sonar_beam = sonar.toSonarBeam();
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
     }
     std::cout << std::endl;
@@ -91,7 +97,8 @@ BOOST_AUTO_TEST_CASE(micron)
     {
         micron.requestData();
         micron.receiveData(1000);
-        micron.decodeSonarBeam(sonar_beam);
+        micron.decodeSonar(sonar);
+        sonar_beam = sonar.toSonarBeam();
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
     }
     std::cout << std::endl;
@@ -106,7 +113,8 @@ BOOST_AUTO_TEST_CASE(micron)
     {
         micron.requestData();
         micron.receiveData(1000);
-        micron.decodeSonarBeam(sonar_beam);
+        micron.decodeSonar(sonar);
+        sonar_beam = sonar.toSonarBeam();
         std::cout << "bearing[deg]: " << sonar_beam.bearing.rad /M_PI*180 << std::endl;;
     }
     std::cout << std::endl;

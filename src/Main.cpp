@@ -72,7 +72,9 @@ int main(int argc, char** argv)
     while(1) {
         driver.receiveData(1000);
         driver.requestData();
-        driver.decodeSonarBeam(sonar_beam);
+        base::samples::Sonar sonar;
+        driver.decodeSonar(sonar);
+        sonar_beam = sonar.toSonarBeam();
         udp.sendSonarBeam(sonar_beam);
     }
     return 0;
