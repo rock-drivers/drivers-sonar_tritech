@@ -2,7 +2,7 @@
 #define _SEANET_PROFILING_HPP_ 
 
 #include "SeaNet.hpp"
-#include <base/samples/laser_scan.h>
+#include <base/samples/LaserScan.hpp>
 
 namespace aggregator
 {

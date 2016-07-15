@@ -1,7 +1,7 @@
 #ifndef _SEANET_TYPES_H_
 #define _SEANET_TYPES_H_
 
-#include <base/angle.h>
+#include <base/Angle.hpp>
 #include <stdint.h>
 
 namespace sea_net

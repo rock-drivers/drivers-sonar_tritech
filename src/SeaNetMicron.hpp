@@ -5,7 +5,7 @@
 #include "SeaNetTypesInternal.hpp"
 
 #include <base/samples/Sonar.hpp>
-#include <base/samples/rigid_body_state.h>
+#include <base/samples/RigidBodyState.hpp>
 
 namespace sea_net
 { 
