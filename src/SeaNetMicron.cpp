@@ -2,7 +2,7 @@
 #include "SeaNetTypesInternal.hpp"
 #include <iodrivers_base/Timeout.hpp>
 #include <iostream>
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 
 using namespace sea_net;
 

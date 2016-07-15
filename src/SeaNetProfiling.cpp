@@ -1,6 +1,6 @@
 #include "SeaNetProfiling.hpp"
 #include "SeaNetTypesInternal.hpp"
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 #include <cmath>
 #include <aggregator/TimestampEstimator.hpp>
 

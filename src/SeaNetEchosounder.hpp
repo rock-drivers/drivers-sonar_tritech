@@ -2,7 +2,7 @@
 #define _SEANETECHOSOUNDER_H_
 
 #include <iodrivers_base/Driver.hpp>
-#include <base/samples/rigid_body_state.h>
+#include <base/samples/RigidBodyState.hpp>
 
 namespace sea_net {
 

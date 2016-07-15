@@ -1,7 +1,7 @@
 #include "SeaNetEchosounder.hpp"
 #include <iodrivers_base/Timeout.hpp>
 #include <iostream>
-#include <base/logging.h>
+#include <base-logging/Logging.hpp>
 
 namespace sea_net{
 
