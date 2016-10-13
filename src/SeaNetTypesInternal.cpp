@@ -1,6 +1,7 @@
 #include "SeaNetTypesInternal.hpp"
 #include <stdio.h>
 #include <iostream>
+#include <stdexcept>
 #include <base-logging/Logging.hpp>
 
 using namespace sea_net;
