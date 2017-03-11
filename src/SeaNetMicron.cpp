@@ -32,6 +32,11 @@ void Micron::decodeSonar(base::samples::Sonar &sonar)
     ImagingHeadData data;
     sea_net_packet.decodeHeadData(data);
 
+    // If the transducer head bearing is getting confused about its position, the sonar image will be rotated.
+    // This is noticed by MOTERR flag. In this case, throw this exception.
+    if (((data.head_status >> 1) & 1))
+        throw std::runtime_error("Motor head lost synchronization.");
+
     //check if the configuration is ok
     //be careful some values cannot be configured for the micron dst like SCANRIGHT (always == 1)
     //some other values are dynamically by the device like MOTOFF
