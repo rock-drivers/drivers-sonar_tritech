@@ -66,7 +66,8 @@ void Micron::decodeSonar(base::samples::Sonar &sonar)
     //the micron dst is not using the lockout_time value
     //therefore we are removing the values here 
     //lockout_time is in microseconds and sampling_interval in sec
-    double sampling_interval = ((640.0 * data.ad_interval) * 1e-9);
+    double sampling_interval = 640.0 * data.ad_interval * 1e-9;
+    sonar.bin_duration = base::Time::fromSeconds(sampling_interval * 0.5);
     size_t lockouts = head_config.lockout_time / (10e6 * sampling_interval);
     LOG_DEBUG_S << "Erasing " << lockouts<< " bins because of lockout_time." ;
 
